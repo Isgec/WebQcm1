@@ -1,0 +1,100 @@
+<%@ Master Language="VB" CodeFile="MasterPage.master.vb" Inherits="lgMasterPage" %>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+  <title>ISGEC-Travel Bill Management</title>
+  <link rel="SHORTCUT ICON" type="image/x-icon" runat="server" href="~/isgec.ico" />
+  <link rel="stylesheet" href="/../UserRights/Menu/Menu.css" />
+  <script type="text/javascript" src="/../UserRights/jquery/jquery.js"></script>
+  <link rel="stylesheet" href="/../UserRights/jquery/themes/smoothness/jquery-ui.css" />
+  <script type="text/javascript" src="/../UserRights/jquery/jquery-ui.js"></script>
+  <script type="text/javascript">
+    $(function () {
+      $(".page").resizable();
+    });
+  </script>
+  <asp:ContentPlaceHolder ID="cphMain" runat="server" EnableViewState="true">
+  </asp:ContentPlaceHolder>
+</head>
+<body>
+  <form id="form1" runat="server">
+  <ASP:ScriptManager ID="ToolkitScriptManager1" EnableScriptGlobalization="true" runat="server" EnablePageMethods="true" AsyncPostBackTimeout="3600" EnableScriptLocalization="True" ScriptMode="Auto">
+    <Scripts>
+        <asp:ScriptReference Path="/../UserRights/jquery/webkit.js" />
+    </Scripts>
+  </ASP:ScriptManager>
+  <LGM:LGLoading ID="LGLoadingM" runat="server" />
+  <script type="text/javascript">
+    Sys.WebForms.PageRequestManager.getInstance().add_endRequest(hideProcessingMPV);
+    Sys.WebForms.PageRequestManager.getInstance().add_beginRequest(showProcessingMPV);
+    function groupClicked(p) {
+      var tbl = p.parentElement.parentElement;
+      var o = p.parentElement.rowIndex;
+      for (ii = 0; ii <= tbl.rows.length - 1; ii++) {
+        if (ii > o) {
+          if (tbl.rows[ii].id != '')
+            return;
+          if (tbl.rows[ii].style.display == 'none')
+            tbl.rows[ii].style.display = '';
+          else
+            tbl.rows[ii].style.display = 'none';
+        }
+      }
+    }
+    function dc(o, p) {
+      var dec = /^-?\d+(?:\.\d{0,6})?$/;
+      var v = o.value;
+      if (v.match(dec)) {
+        o.value = parseFloat(v).toFixed(p);
+      } else {
+        o.value = parseFloat('0').toFixed(p);
+      }
+    }
+  </script>
+  <div id="divmain" class="master_table">
+    <table style="width: 100%">
+      <tr>
+        <td class="sis_header">
+          <asp:Image ID="any" runat="server" AlternateText="logo" CssClass="sis_header" ImageUrl="~/App_Themes/Default/Images/headernew.jpg" />
+        </td>
+        <td class="loginTd">
+          <LGM:LoginLine ID="LoginLine1" runat="server" />
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2" id="algmnu" runat="server" align="center" style="margin: auto">
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2" class="wp_body" runat="server" id="mainBody">
+          <asp:ContentPlaceHolder ID="cph1" runat="server" EnableViewState="true">
+          </asp:ContentPlaceHolder>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2" class="sis_footer">
+          <table style="width: 100%">
+            <tr>
+              <td>
+                <span style="color: #ffffff"><font size="1">© ISGEC Heavy Engineering Limited. All rights reserved.</font></span>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font size="1"><span style="color: #ffffff">A-4, Sector-24, NOIDA, U.P. 201 301, INDIA </span></font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <span style="color: #99ccff">Designed &amp; Developed by:</span> <span style="color: #99ffcc">ISGEC IT Team</span>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </div>
+  </form>
+
+</body>
+</html>

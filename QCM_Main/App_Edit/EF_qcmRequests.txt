@@ -1,0 +1,136 @@
+﻿12. gridview
+		If e.CommandName.ToLower = "lgfwd".ToLower Then
+			Try
+				Dim RequestID As Int32 = GVqcmRequests.DataKeys(e.CommandArgument).Values("RequestID")
+				If SIS.QCM.qcmRequests.ForwardForAllotment(RequestID) Then
+					GVqcmRequests.DataBind()
+				End If
+			Catch ex As Exception
+			End Try
+		End If
+
+11. gridview
+        <asp:TemplateField>
+          <ItemTemplate>
+						<table><tr>
+              <td><asp:ImageButton ID="cmdForward" runat="server" Visible='<%# EVal("ForwardVisible") %>' Enabled='<%# EVal("Enable") %>' AlternateText="Forward" ToolTip="Forward for allotment." ImageUrl="~/App_Themes/Default/Images/RecForward.png" CommandName="lgFwd" CommandArgument='<%# Container.DataItemIndex %>' OnClientClick="return confirm('Forward for allotment ?');" /></td>
+						</tr></Table>
+          </ItemTemplate>
+          <HeaderStyle Width="30px" />
+        </asp:TemplateField>
+
+1.
+      EnableAdd="false"
+2.
+		<table id="F_Upload" runat="server" visible="<%# Editable %>" >
+			<tr>
+				<td>
+					<asp:Label ID="L_FileUpload" runat="server" Font-Bold="true" Text="Attatch File :"></asp:Label>
+				</td>
+				<td style="text-align:left">
+					<input type="text" id="fileName" style="width:500px" class="file_input_textbox" readonly="readonly">
+					 
+					<div class="file_input_div">
+						<input type="button" value="Search file" class="file_input_button" />
+						<asp:FileUpload ID="F_FileUpload" runat="server" Width="100%" Visible="<%# Editable %>" class="file_input_hidden" onchange="javascript: document.getElementById('fileName').value = this.value" ToolTip="Attatch File" />
+					</div>
+				</td>
+				<td>
+					<asp:Button ID="cmdFileUpload" CssClass="file_upload_button" Text="Upload File" runat="server" Visible="<%# Editable %>" ToolTip="Click to attatch file." CommandName="Upload" CommandArgument="<%# RequestID %>" />
+				</td>
+			</tr>
+		</table>
+3.
+              <asp:ImageButton ID="cmdRemove" runat="server" AlternateText="Remove" Visible="<%# Editable %>" CommandName="Remove" CommandArgument='<%# Container.DataItemIndex %>' ToolTip="Click to remove." SkinID="delete" OnClientClick="return confirm('Remove the record ?');" />
+4.
+            <asp:LinkButton ID="LabelFileName" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("FileName") %>' CommandName="DownloadFile" CommandArgument='<%# Container.DataItemIndex %>' ></asp:LinkButton>
+
+5.
+    <asp:PostBackTrigger ControlID="GVqcmRequestFiles"/>
+		<asp:PostBackTrigger ControlID="cmdFileUpload" />
+
+6. SelectList:
+					If OrderBy = String.Empty Then OrderBy = "RequestID DESC"
+					_LG_
+
+
+10.
+	Public Property Editable() As Boolean
+		Get
+			If ViewState("Editable") IsNot Nothing Then
+				Return CType(ViewState("Editable"), Boolean)
+			End If
+		End Get
+		Set(ByVal value As Boolean)
+			ViewState.Add("Editable", value)
+		End Set
+	End Property
+	Public Property RequestID() As Integer
+		Get
+			If ViewState("RequestID") IsNot Nothing Then
+				Return CType(ViewState("RequestID"), Integer)
+			End If
+		End Get
+		Set(ByVal value As Integer)
+			ViewState.Add("RequestID", value)
+		End Set
+	End Property
+	Protected Sub ODSqcmRequests_Selected(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.ObjectDataSourceStatusEventArgs) Handles ODSqcmRequests.Selected
+		Dim oRequest As SIS.QCM.qcmRequests = CType(e.ReturnValue, SIS.QCM.qcmRequests)
+		If oRequest.RequestStateID <> "OPEN" Then
+			Editable = False
+		Else
+			Editable = True
+		End If
+	End Sub
+	Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+		If Not Page.IsCallback And Not Page.IsPostBack Then
+			RequestID = Request.QueryString("REquestID")
+		End If
+	End Sub
+	Protected Sub cmdFileUpload_Command(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.CommandEventArgs) Handles cmdFileUpload.Command
+		With F_FileUpload
+			If .HasFile Then
+				Dim oAT As SIS.QCM.qcmRequestFiles = New SIS.QCM.qcmRequestFiles
+				Dim oRm As Random = New Random
+				oAT.RequestID = e.CommandArgument
+				oAT.FileName = .FileName
+				oAT.DiskFIleName = oAT.RequestID & oRm.Next(1000, 99999999)
+				oAT = SIS.QCM.qcmRequestFiles.InsertData(oAT)
+				.SaveAs(Server.MapPath(ConfigurationManager.AppSettings("RequestDir")) & "/" & oAT.DiskFIleName)
+				GVqcmRequestFiles.DataBind()
+			End If
+		End With
+	End Sub
+	Protected Sub GVqcmRequestFiles_RowCommand(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewCommandEventArgs) Handles GVqcmRequestFiles.RowCommand
+		If e.CommandName.ToLower = "downloadfile" Then
+			Try
+				Dim RequestID As Int32 = GVqcmRequestFiles.DataKeys(e.CommandArgument).Values("RequestID")
+				Dim SerialNo As Int32 = GVqcmRequestFiles.DataKeys(e.CommandArgument).Values("SerialNo")
+				Dim oAT As SIS.QCM.qcmRequestFiles = SIS.QCM.qcmRequestFiles.qcmRequestFilesGetByID(RequestID, SerialNo)
+				If IO.File.Exists(Server.MapPath(ConfigurationManager.AppSettings("RequestDir")) & "/" & oAT.DiskFIleName) Then
+					Response.AppendHeader("content-disposition", "attachment; filename=" & oAT.FileName)
+					Response.ContentType = oAT.ContentType
+					Response.WriteFile(Server.MapPath(ConfigurationManager.AppSettings("RequestDir")) & "/" & oAT.DiskFIleName)
+					Response.Flush()
+				End If
+			Catch ex As Exception
+			End Try
+		End If
+		If e.CommandName.ToLower = "remove" Then
+			Try
+				Dim RequestID As Int32 = GVqcmRequestFiles.DataKeys(e.CommandArgument).Values("RequestID")
+				Dim SerialNo As Int32 = GVqcmRequestFiles.DataKeys(e.CommandArgument).Values("SerialNo")
+				Dim oAT As SIS.QCM.qcmRequestFiles = SIS.QCM.qcmRequestFiles.qcmRequestFilesGetByID(RequestID, SerialNo)
+				IO.File.Delete(Server.MapPath(ConfigurationManager.AppSettings("RequestDir")) & "/" & oAT.DiskFIleName)
+				SIS.QCM.qcmRequestFiles.Delete(oAT)
+				GVqcmRequestFiles.DataBind()
+			Catch ex As Exception
+			End Try
+		End If
+	End Sub
+11.
+Prerender:
+		If Not Editable Then
+			TBLqcmRequests.EnableSave = False
+		End If

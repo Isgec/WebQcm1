@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<discovery xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.xmlsoap.org/disco/">
+  <contractRef ref="http://localhost/WebTools1/App_Services/ToolsServices.asmx?wsdl" docRef="http://localhost/WebTools1/App_Services/ToolsServices.asmx" xmlns="http://schemas.xmlsoap.org/disco/scl/" />
+  <soap address="http://localhost/WebTools1/App_Services/ToolsServices.asmx" xmlns:q1="http://WebTools.Services/" binding="q1:ToolsServicesSoap" xmlns="http://schemas.xmlsoap.org/disco/soap/" />
+  <soap address="http://localhost/WebTools1/App_Services/ToolsServices.asmx" xmlns:q2="http://WebTools.Services/" binding="q2:ToolsServicesSoap12" xmlns="http://schemas.xmlsoap.org/disco/soap/" />
+</discovery>

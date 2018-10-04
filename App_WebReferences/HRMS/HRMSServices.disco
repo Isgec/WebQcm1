@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<discovery xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.xmlsoap.org/disco/">
+  <contractRef ref="http://localhost/WebHrms1/App_Services/HRMSServices.asmx?wsdl" docRef="http://localhost/WebHrms1/App_Services/HRMSServices.asmx" xmlns="http://schemas.xmlsoap.org/disco/scl/" />
+  <soap address="http://localhost/WebHrms1/App_Services/HRMSServices.asmx" xmlns:q1="http://WebHrms.services/" binding="q1:HRMSServicesSoap" xmlns="http://schemas.xmlsoap.org/disco/soap/" />
+  <soap address="http://localhost/WebHrms1/App_Services/HRMSServices.asmx" xmlns:q2="http://WebHrms.services/" binding="q2:HRMSServicesSoap12" xmlns="http://schemas.xmlsoap.org/disco/soap/" />
+</discovery>
