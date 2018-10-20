@@ -33,19 +33,12 @@ Partial Class GF_qcmRequests
         Dim RequestID As Int32 = GVqcmRequests.DataKeys(e.CommandArgument).Values("RequestID")
         Dim tmp As SIS.QCM.qcmRequests = SIS.QCM.qcmRequests.qcmRequestsGetByID(RequestID)
         With tmp
+          'Re-Initialize, Required Fields
           .RequestID = 0
-          '.ProjectID = ""
-          '.OrderNo = ""
-          '.OrderDate = ""
-          '.SupplierID = ""
-          '.Description = ""
-          '.RegionID = ""
           .TotalRequestedQuantity = "0.00"
           .LotSize = "0.00"
           .UOM = "Nos"
           .DocumentID = ""
-          '.RequestedInspectionStartDate = ""
-          '.RequestedInspectionFinishDate = ""
           .ClientInspectionRequired = False
           .ThirdPartyInspectionRequired = False
           .InspectionStageiD = ""
@@ -56,7 +49,6 @@ Partial Class GF_qcmRequests
           .ReceivingMediumID = ""
           .CreatedBy = HttpContext.Current.Session("LoginID")
           .CreatedOn = Now
-          '.CreationRemarks = ""
           .AllotedTo = ""
           .AllotedStartDate = ""
           .AllotedFinishDate = ""
@@ -74,8 +66,23 @@ Partial Class GF_qcmRequests
           .PausedHrs = 0
           .TotalHrs = 0
           .LastPausedOn = ""
+          'Fields Copied 
+          '.ProjectID = ""
+          '.OrderNo = ""
+          '.OrderDate = ""
+          '.SupplierID = ""
+          '.Description = ""
+          '.RegionID = ""
+          '.RequestedInspectionStartDate = ""
+          '.RequestedInspectionFinishDate = ""
+          '.CreationRemarks = ""
+          '.POWeight
         End With
         tmp = SIS.QCM.qcmRequests.InsertData(tmp)
+        Try
+          SIS.QCM.qcmRequests.CreateItemReference(tmp)
+        Catch ex As Exception
+        End Try
         Dim RedirectUrl As String = TBLqcmRequests.EditUrl & "?RequestID=" & tmp.RequestID
         Response.Redirect(RedirectUrl)
       Catch ex As Exception

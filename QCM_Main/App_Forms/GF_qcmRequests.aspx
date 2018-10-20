@@ -199,6 +199,7 @@
           <ItemTemplate>
             <asp:Label ID="LabelTotalRequestedQuantity" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Eval("NewTotalQuantity") %>'></asp:Label>
           </ItemTemplate>
+          <ItemStyle CssClass="alignCenter" />
         <HeaderStyle Width="100px" />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="Requested Inspection Date" SortExpression="RequestedInspectionStartDate">
@@ -238,7 +239,7 @@
 							<td colspan="4">
  								<asp:Label ID="Label1" runat="server" ForeColor="Red" Text='<%# Eval("ReturnDetails") %>'></asp:Label>
 							</td>
-							<td colspan="2">
+							<td colspan="3">
 								<asp:Label ID="Label5" runat="server"  ForeColor='<%# Eval("ForeColor") %>' Title='<%# EVal("QCM_InspectionStatus11_Description") %>' Text='<%# Eval("QCM_InspectionStatus11_Description") %>'></asp:Label>
 							</td>
 						</tr>

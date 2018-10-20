@@ -388,6 +388,13 @@ Partial Class EF_qcmRequests
     If Not Page.ClientScript.IsClientScriptBlockRegistered("scriptqcmRequests") Then
       Page.ClientScript.RegisterClientScriptBlock(GetType(System.String), "scriptqcmRequests", mStr)
     End If
+    Dim oTR As IO.StreamReader = New IO.StreamReader(HttpContext.Current.Server.MapPath("~/QCM_Main/App_Edit") & "/EF_qcmRequests.js")
+    mStr = oTR.ReadToEnd
+    oTR.Close()
+    oTR.Dispose()
+    If Not Page.ClientScript.IsClientScriptBlockRegistered("scripterpPO") Then
+      Page.ClientScript.RegisterClientScriptBlock(GetType(System.String), "scripterpPO", mStr)
+    End If
   End Sub
   <System.Web.Services.WebMethod()>
   Public Shared Function validate_FK_QCM_Requests_ReceivedBy(ByVal value As String) As String
@@ -489,4 +496,45 @@ Partial Class EF_qcmRequests
 
     End Try
   End Sub
+  Private WithEvents gvqcmctRequestCC As New gvBase
+  Protected Sub GVqcmctRequest_Init(ByVal sender As Object, ByVal e As System.EventArgs) Handles GVqcmctRequest.Init
+    gvqcmctRequestCC.DataClassName = "GqcmctRequest"
+    gvqcmctRequestCC.SetGridView = GVqcmctRequest
+  End Sub
+  Protected Sub TBLqcmctRequest_Init(ByVal sender As Object, ByVal e As System.EventArgs) Handles TBLqcmctRequest.Init
+    gvqcmctRequestCC.SetToolBar = TBLqcmctRequest
+  End Sub
+  Protected Sub GVqcmctRequest_RowCommand(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewCommandEventArgs) Handles GVqcmctRequest.RowCommand
+    If e.CommandName.ToLower = "lgedit".ToLower Then
+      Try
+        Dim QCRequestNo As Int32 = GVqcmctRequest.DataKeys(e.CommandArgument).Values("QCRequestNo")
+        Dim SerialNo As Int32 = GVqcmctRequest.DataKeys(e.CommandArgument).Values("SerialNo")
+        Dim PONumber As String = GVqcmctRequest.DataKeys(e.CommandArgument).Values("PONumber")
+        Dim ItemReference As String = GVqcmctRequest.DataKeys(e.CommandArgument).Values("ItemReference")
+        Dim ActivityID As String = GVqcmctRequest.DataKeys(e.CommandArgument).Values("ActivityID")
+        Dim RedirectUrl As String = TBLqcmctRequest.EditUrl & "?QCRequestNo=" & QCRequestNo & "&SerialNo=" & SerialNo & "&PONumber=" & PONumber & "&ItemReference=" & ItemReference & "&ActivityID=" & ActivityID
+        Response.Redirect(RedirectUrl)
+      Catch ex As Exception
+        ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", "alert('" & New JavaScriptSerializer().Serialize(ex.Message) & "');", True)
+      End Try
+    End If
+  End Sub
+  Protected Sub TBLqcmctRequest_AddClicked(ByVal sender As Object, ByVal e As System.Web.UI.ImageClickEventArgs) Handles TBLqcmctRequest.AddClicked
+    Dim RequestID As Int32 = CType(FVqcmRequests.FindControl("F_RequestID"), TextBox).Text
+    TBLqcmctRequest.AddUrl &= "?RequestID=" & RequestID
+  End Sub
+  <System.Web.Services.WebMethod()>
+  Public Shared Function validate_ERPPONumber(ByVal value As String) As String
+    Dim aVal() As String = value.Split(",".ToCharArray)
+    Dim mRet As String = "0|" & aVal(0)
+    Dim ERPPoNumber As String = CType(aVal(1), String)
+    Dim oVar As SIS.ERP.ERPPo = SIS.ERP.ERPPo.ERPPoGetByID(ERPPoNumber)
+    If oVar Is Nothing Then
+      mRet = "1|" & aVal(0) & "|PO Number NOT found in ERP LN."
+    Else
+      mRet = "0|" & aVal(0) & "|" & oVar.SupplierID & "|" & oVar.ProjectID & "|" & oVar.POWeight
+    End If
+    Return mRet
+  End Function
+
 End Class

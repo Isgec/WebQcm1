@@ -313,6 +313,13 @@ Partial Class AF_qcmRequests
     If Not Page.ClientScript.IsClientScriptBlockRegistered("scriptqcmRequests") Then
       Page.ClientScript.RegisterClientScriptBlock(GetType(System.String), "scriptqcmRequests", mStr)
     End If
+    Dim oTR As IO.StreamReader = New IO.StreamReader(HttpContext.Current.Server.MapPath("~/QCM_Main/App_Create") & "/AF_qcmRequests.js")
+    mStr = oTR.ReadToEnd
+    oTR.Close()
+    oTR.Dispose()
+    If Not Page.ClientScript.IsClientScriptBlockRegistered("scripterpPO") Then
+      Page.ClientScript.RegisterClientScriptBlock(GetType(System.String), "scripterpPO", mStr)
+    End If
   End Sub
   <System.Web.Services.WebMethod()>
   Public Shared Function validate_FK_QCM_Requests_ReceivedBy(ByVal value As String) As String
@@ -399,4 +406,17 @@ Partial Class AF_qcmRequests
 
     End Try
   End Sub
+  <System.Web.Services.WebMethod()>
+  Public Shared Function validate_ERPPONumber(ByVal value As String) As String
+    Dim aVal() As String = value.Split(",".ToCharArray)
+    Dim mRet As String = "0|" & aVal(0)
+    Dim ERPPoNumber As String = CType(aVal(1), String)
+    Dim oVar As SIS.ERP.ERPPo = SIS.ERP.ERPPo.ERPPoGetByID(ERPPoNumber)
+    If oVar Is Nothing Then
+      mRet = "1|" & aVal(0) & "|PO Number NOT found in ERP LN."
+    Else
+      mRet = "0|" & aVal(0) & "|" & oVar.SupplierID & "|" & oVar.ProjectID & "|" & oVar.POWeight
+    End If
+    Return mRet
+  End Function
 End Class

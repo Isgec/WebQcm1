@@ -1,0 +1,187 @@
+﻿Imports System
+Imports System.Collections.Generic
+Imports System.Data
+Imports System.Data.SqlClient
+Imports System.ComponentModel
+Namespace SIS.CT
+  Public Class ctUpdates
+    Public Shared Sub CT_ManualQCRequest(ByVal pp As SIS.QCM.qcmRequests)
+      Dim errMsg As String = ""
+      Dim hndl As String = "CT_INSPECTIONCALLRAISED"
+      '1. Insert In tpisg229
+      Dim ct229 As New SIS.TPISG.tpisg229
+      With ct229
+        .t_trdt = Now.ToString("dd/MM/yyyy HH:mm:ss")
+        .t_bohd = hndl
+        .t_indv = pp.RequestID & "_" & pp.OrderNo
+        .t_srno = 1
+        .t_proj = pp.ProjectID
+        .t_elem = ""
+        .t_user = HttpContext.Current.Session("LoginID")
+        .t_stat = ""
+        .t_Refcntd = 0
+        .t_Refcntu = 0
+      End With
+      ct229 = SIS.TPISG.tpisg229.InsertData(ct229)
+      '2. Insert In tpisg230
+      Dim DSrn As Integer = 0
+      Dim PODocs As List(Of SIS.DOCS.Document) = SIS.DOCS.Document.DocumentsSelectList(pp.OrderNo)
+      If PODocs.Count > 0 Then
+        For Each PODoc As SIS.DOCS.Document In PODocs
+          DSrn += 1
+          Dim ct230 As New SIS.TPISG.tpisg230
+          With ct230
+            .t_trdt = ct229.t_trdt
+            .t_bohd = hndl
+            .t_indv = pp.RequestID & "_" & pp.OrderNo
+            .t_srno = 1
+            .t_dsno = DSrn
+            .t_dwno = PODoc.t_docn
+            .t_elem = ""
+            .t_proj = pp.ProjectID
+            .t_wght = 0
+            .t_pitc = 0
+            .t_stat = ""
+            .t_atcd = ""
+            .t_scup = 0
+            .t_acdt = "01/01/1970"
+            .t_acfh = "01/01/1970"
+            .t_pper = 0
+            .t_lupd = "01/01/1970"
+            .t_Refcntd = 0
+            .t_Refcntu = 0
+            .t_numo = 0
+            .t_numq = 0
+            .t_numt = 0
+            .t_numv = 0
+            .t_nutc = 0
+            .t_cuni = ""
+            .t_iref = ""
+            .t_quan = 0
+            .t_iuom = ""
+          End With
+          ct230 = SIS.TPISG.tpisg230.InsertData(ct230)
+          '3. Update Issue Date in dmisg140 'PMDL
+          SIS.DMISG.dmisg140.UpdatePOAD(PODoc.t_docn)
+        Next
+      End If
+      '4. Calculate Progress %
+      '4.1 Get PO IREFs
+      Dim POIrefs As List(Of SIS.QCMCT.qcmctRequest) = SIS.QCMCT.qcmctRequest.UZ_qcmctRequestSelectList(0, 999, "", False, "", pp.RequestID)
+      For Each iref As SIS.QCMCT.qcmctRequest In POIrefs
+        '5. % Progress
+        Dim ProgressPercent As Decimal = 0
+        ProgressPercent = iref.PercentOfQuantity
+        Dim tmpFactor As SIS.TPISG.tpisg220 = SIS.TPISG.tpisg220.GetByIrefHandle(pp.ProjectID, iref.ItemReference, "CT_POAPPROVED")
+        If tmpFactor IsNot Nothing Then
+          ProgressPercent = iref.PercentOfQuantity * tmpFactor.t_cpgv * 0.01
+        End If
+        iref.ProgressPercent = ProgressPercent
+        iref = SIS.QCMCT.qcmctRequest.UpdateData(iref)
+        '6. Update Activity Progress
+        If ProgressPercent > 0 Then
+          SIS.TPISG.tpisg220.UpdateProgress(pp.ProjectID, iref.ItemReference, ProgressPercent, hndl)
+        End If
+      Next
+      If errMsg <> "" Then
+        Throw New Exception(errMsg)
+      End If
+    End Sub
+
+    'Public Shared Sub CT_POIssued(ByVal pp As SIS.PAK.pakPO)
+    '  Dim errMsg As String = ""
+    '  Dim hndl As String = "CT_POISSUED"
+    '  '1. Insert In tpisg229
+    '  Dim ct229 As New SIS.TPISG.tpisg229
+    '  With ct229
+    '    .t_trdt = Now.ToString("dd/MM/yyyy HH:mm:ss")
+    '    .t_bohd = hndl
+    '    .t_indv = pp.SerialNo & "_" & pp.PONumber
+    '    .t_srno = 1
+    '    .t_proj = pp.ProjectID
+    '    .t_elem = ""
+    '    .t_user = pp.IssuedBy
+    '    .t_stat = ""
+    '    .t_Refcntd = 0
+    '    .t_Refcntu = 0
+    '  End With
+    '  ct229 = SIS.TPISG.tpisg229.InsertData(ct229)
+    '  '2. Insert In tpisg230
+    '  Dim DSrn As Integer = 0
+    '  Dim PODocs As List(Of SIS.DOCS.Document) = SIS.DOCS.Document.DocumentsSelectList(pp.PONumber)
+    '  If PODocs.Count > 0 Then
+    '    For Each PODoc As SIS.DOCS.Document In PODocs
+    '      DSrn += 1
+    '      Dim ct230 As New SIS.TPISG.tpisg230
+    '      With ct230
+    '        .t_trdt = ct229.t_trdt
+    '        .t_bohd = hndl
+    '        .t_indv = pp.SerialNo & "_" & pp.PONumber
+    '        .t_srno = 1
+    '        .t_dsno = DSrn
+    '        .t_dwno = PODoc.t_docn
+    '        .t_elem = ""
+    '        .t_proj = pp.ProjectID
+    '        .t_wght = 0
+    '        .t_pitc = 0
+    '        .t_stat = ""
+    '        .t_atcd = ""
+    '        .t_scup = 0
+    '        .t_acdt = "01/01/1970"
+    '        .t_acfh = "01/01/1970"
+    '        .t_pper = 0
+    '        .t_lupd = "01/01/1970"
+    '        .t_Refcntd = 0
+    '        .t_Refcntu = 0
+    '        .t_numo = 0
+    '        .t_numq = 0
+    '        .t_numt = 0
+    '        .t_numv = 0
+    '        .t_nutc = 0
+    '        .t_cuni = ""
+    '        .t_iref = ""
+    '        .t_quan = 0
+    '        .t_iuom = ""
+    '      End With
+    '      ct230 = SIS.TPISG.tpisg230.InsertData(ct230)
+    '      '3. Update Issue Date in dmisg140 'PMDL
+    '      SIS.DMISG.dmisg140.UpdatePOIS(PODoc.t_docn)
+    '    Next
+    '  End If
+    '  '4. Calculate Progress %
+    '  '4.1 Get PO IREFs
+    '  Dim POIrefs As List(Of SIS.IREF.ItemReference) = SIS.IREF.ItemReference.ItemReferenceSelectList(pp.PONumber)
+    '  For Each iref As SIS.IREF.ItemReference In POIrefs
+    '    Dim TotalDocCount As Decimal = 0
+    '    Dim UpdatedDocCount As Decimal = 0
+    '    '4.2 Get All Documents for IREF
+    '    Dim docs As List(Of SIS.DMISG.dmisg140) = SIS.DMISG.dmisg140.GetIREFDocuments(iref.t_cprj, iref.t_iref)
+    '    TotalDocCount += docs.Count
+    '    For Each doc As SIS.DMISG.dmisg140 In docs
+    '      If doc.t_pois <> "" Then
+    '        If Convert.ToDateTime(doc.t_pois) > Convert.ToDateTime("31/12/2000") Then
+    '          UpdatedDocCount += 0.5
+    '        End If
+    '      End If
+    '      If doc.t_poad <> "" Then
+    '        If Convert.ToDateTime(doc.t_poad) > Convert.ToDateTime("31/12/2000") Then
+    '          UpdatedDocCount += 0.5
+    '        End If
+    '      End If
+    '    Next
+    '    '5. % Progress
+    '    Dim ProgressPercent As Decimal = 0
+    '    Try
+    '      ProgressPercent = (UpdatedDocCount / TotalDocCount) * 100
+    '    Catch ex As Exception
+    '      errMsg = "PP Calc Err Iref: " & iref.t_iref
+    '    End Try
+    '    '6. Update Activity Progress
+    '    SIS.TPISG.tpisg220.UpdateProgress(iref.t_cprj, iref.t_iref, ProgressPercent)
+    '  Next
+    '  If errMsg <> "" Then
+    '    Throw New Exception(errMsg)
+    '  End If
+    'End Sub
+  End Class
+End Namespace

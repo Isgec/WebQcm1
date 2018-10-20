@@ -72,6 +72,7 @@ Namespace SIS.QCM
     Public Property PausedHrs As Decimal = 0
     Public Property LastPausedOn As String = ""
     Public Property TotalHrs As Decimal = 0
+    Public Property POWeight As Decimal = 0
     Public Property LotSize As String
       Get
         Return _LotSize
@@ -1025,6 +1026,7 @@ Namespace SIS.QCM
         .UOM = Record.UOM
         .InspectionStageiD = Record.InspectionStageiD
         .ReturnRemarks = Record.ReturnRemarks
+        .POWeight = Record.POWeight
       End With
       Return SIS.QCM.qcmRequests.InsertData(_Rec)
     End Function
@@ -1073,6 +1075,7 @@ Namespace SIS.QCM
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@PausedHrs", SqlDbType.Decimal, 21, Record.PausedHrs)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@TotalHrs", SqlDbType.Decimal, 21, Record.TotalHrs)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LastPausedOn", SqlDbType.DateTime, 21, IIf(Record.LastPausedOn = "", Convert.DBNull, Record.LastPausedOn))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@POWeight", SqlDbType.Decimal, 21, Record.POWeight)
           Cmd.Parameters.Add("@Return_RequestID", SqlDbType.Int, 11)
           Cmd.Parameters("@Return_RequestID").Direction = ParameterDirection.Output
           Con.Open()
@@ -1104,6 +1107,7 @@ Namespace SIS.QCM
         .UOM = Record.UOM
         .InspectionStageiD = Record.InspectionStageiD
         .ReturnRemarks = Record.ReturnRemarks
+        .POWeight = Record.POWeight
       End With
       Return SIS.QCM.qcmRequests.UpdateData(_Rec)
     End Function
@@ -1153,6 +1157,7 @@ Namespace SIS.QCM
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@PausedHrs", SqlDbType.Decimal, 21, Record.PausedHrs)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@TotalHrs", SqlDbType.Decimal, 21, Record.TotalHrs)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LastPausedOn", SqlDbType.DateTime, 21, IIf(Record.LastPausedOn = "", Convert.DBNull, Record.LastPausedOn))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@POWeight", SqlDbType.Decimal, 21, Record.POWeight)
           Cmd.Parameters.Add("@RowCount", SqlDbType.Int)
           Cmd.Parameters("@RowCount").Direction = ParameterDirection.Output
           _RecordCount = -1

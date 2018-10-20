@@ -338,15 +338,13 @@ Namespace SIS.QCM
             .AppendLine("<li>" & tm.IDM_Projects6_Description & " [" & tm.ProjectID & "]" & "</li>")
             .AppendLine("<li>Order No: " & tm.OrderNo & "</li>")
             .AppendLine("<li>" & tm.IDM_Vendors7_Description & "</li>")
-            .AppendLine("<li>Address:" & tm.CreationRemarks & "</li>")
-            .AppendLine("<li>" & tm.Description & "</li>")
             .AppendLine("<li>" & tm.AllotmentRemarks & "</li>")
             .AppendLine("<li>Inspection Date: " & tm.AllotedFinishDate & "</li>")
             .AppendLine("</td>")
             .AppendLine("<td style=""vertical-align:middle;text-align:center"">")
             If tm.RequestStateID = "ALLOTED" Or tm.RequestStateID = "REALLOTED" Then
               mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
-              .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?start=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Green; font-weight:bold;"">STARTED</a>")
+              .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm2/QcmCallInspected.aspx?start=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Green; font-weight:bold;"">STARTED</a>")
             End If
             .AppendLine("</td>")
             .AppendLine("<td style=""vertical-align:middle;text-align:center"">")
@@ -354,7 +352,7 @@ Namespace SIS.QCM
               If Convert.ToDateTime(tm.CreatedOn) >= Convert.ToDateTime("26/07/2017") Then
                 If Not tm.Paused Then
                   mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
-                  .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmData.aspx?data=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Green; font-weight:bold;"">INSPECTION DATA</a>")
+                  .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm2/QcmData.aspx?data=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Green; font-weight:bold;"">INSPECTION DATA</a>")
                 End If
               End If
             End If
@@ -363,10 +361,10 @@ Namespace SIS.QCM
             If tm.RequestStateID = "INSPECTED" Then
               If Not tm.Paused Then
                 mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
-                .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?pause=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Gold; font-weight:bold;"">PAUSE</a>")
+                .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm2/QcmCallInspected.aspx?pause=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Gold; font-weight:bold;"">PAUSE</a>")
               Else
                 mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
-                .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?resume=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Gold; font-weight:bold;"">RESUME</a>")
+                .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm2/QcmCallInspected.aspx?resume=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Gold; font-weight:bold;"">RESUME</a>")
               End If
             End If
             .AppendLine("</td>")
@@ -376,7 +374,7 @@ Namespace SIS.QCM
                 Dim tmpIns As List(Of SIS.QCM.qcmInspections) = SIS.QCM.qcmInspections.qcmInspectionsSelectList(0, 10, "", False, "", tm.RequestID)
                 If tmpIns.Count > 1 Then
                   mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
-                  .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?stop=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Green; font-weight:bold;"">CLOSED</a>")
+                  .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm2/QcmCallInspected.aspx?stop=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Green; font-weight:bold;"">CLOSED</a>")
                 End If
               End If
             End If
@@ -559,6 +557,7 @@ Namespace SIS.QCM
         SIS.QCM.qcmRequests.UpdateData(oReq)
         Try
           'SendInspectedEMail(ReqID)
+          SIS.CT.ctUpdates.CT_InspectedInBlackCondition(oReq)
         Catch ex As Exception
         End Try
       Catch ex As Exception
@@ -874,11 +873,7 @@ Namespace SIS.QCM
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Request ID</b></td>")
               .AppendLine("<td>" & Record.RequestID & "</td></tr>")
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Requested By</b></td>")
-              Try
-                .AppendLine("<td>" & Record.FK_QCM_Requests_ReceivedBy.EmployeeName & "</td></tr>")
-              Catch ex As Exception
-                .AppendLine("<td></td></tr>")
-              End Try
+              .AppendLine("<td>" & Record.FK_QCM_Requests_ReceivedBy.EmployeeName & "</td></tr>")
               .AppendLine("</table>")
             End With
             Try
@@ -973,11 +968,7 @@ Namespace SIS.QCM
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Request ID</b></td>")
               .AppendLine("<td>" & Record.RequestID & "</td></tr>")
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Requested By</b></td>")
-              Try
-                .AppendLine("<td>" & Record.FK_QCM_Requests_ReceivedBy.EmployeeName & "</td></tr>")
-              Catch ex As Exception
-                .AppendLine("<td></td></tr>")
-              End Try
+              .AppendLine("<td>" & Record.FK_QCM_Requests_ReceivedBy.EmployeeName & "</td></tr>")
               .AppendLine("</table>")
               .Append(GetPendigRequestHTML(Record.AllotedTo, mMailID))
             End With
@@ -1057,29 +1048,7 @@ Namespace SIS.QCM
             End Using
           End Using
         Catch ex As Exception
-          Dim mSql As String = " INSERT QCM_LogAllotErr "
-          mSql &= " ("
-          mSql &= " UserID,"
-          mSql &= " RequestID,"
-          mSql &= " LoggedOn,"
-          mSql &= " ErrMessage,"
-          mSql &= " MailSrNo "
-          mSql &= " )"
-          mSql &= " VALUES ("
-          mSql &= "'" & Record.AllotedTo & "',"
-          mSql &= Record.RequestID & ",GetDate()"
-          mSql &= ",'Alloted By: " & Record.AllotedBy & " => Err : " & ex.Message & "',"
-          mSql &= mMailID
-          mSql &= ")"
-          Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
-            Using Cmd As SqlCommand = Con.CreateCommand()
-              Cmd.CommandType = CommandType.Text
-              Cmd.CommandText = mSql
-              Con.Open()
-              Cmd.ExecuteNonQuery()
-            End Using
-          End Using
-          Throw New Exception(ex.Message)
+          mRet = ex.Message
         End Try
       End If
       SendNotificationEMail(Record)
@@ -1136,11 +1105,7 @@ Namespace SIS.QCM
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Request ID</b></td>")
               .AppendLine("<td>" & Record.RequestID & "</td></tr>")
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Requested By</b></td>")
-              Try
-                .AppendLine("<td>" & Record.FK_QCM_Requests_ReceivedBy.EmployeeName & "</td></tr>")
-              Catch ex As Exception
-                .AppendLine("<td></td></tr>")
-              End Try
+              .AppendLine("<td>" & Record.FK_QCM_Requests_ReceivedBy.EmployeeName & "</td></tr>")
               .AppendLine("</table>")
             End With
             Try
@@ -1279,11 +1244,7 @@ Namespace SIS.QCM
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Request ID</b></td>")
               .AppendLine("<td>" & Record.RequestID & "</td></tr>")
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Requested By</b></td>")
-              Try
-                .AppendLine("<td>" & Record.FK_QCM_Requests_ReceivedBy.EmployeeName & "</td></tr>")
-              Catch ex As Exception
-                .AppendLine("<td></td></tr>")
-              End Try
+              .AppendLine("<td>" & Record.FK_QCM_Requests_ReceivedBy.EmployeeName & "</td></tr>")
               .AppendLine("</table>")
             End With
             Try

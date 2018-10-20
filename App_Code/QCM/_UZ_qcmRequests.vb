@@ -73,9 +73,31 @@ Namespace SIS.QCM
       Return mRet
     End Function
     Public Shared Function UZ_qcmRequestsInsert(ByVal Record As SIS.QCM.qcmRequests) As SIS.QCM.qcmRequests
-      Dim _Result As SIS.QCM.qcmRequests = qcmRequestsInsert(Record)
-      Return _Result
+      Record = qcmRequestsInsert(Record)
+      CreateItemReference(Record)
+      Return Record
     End Function
+    Public Shared Sub CreateItemReference(ByVal Record As SIS.QCM.qcmRequests)
+      Dim tmpCTs As List(Of SIS.QCMCT.qcmctRequest) = SIS.QCMCT.qcmctRequest.GetERPItemReference(Record.ProjectID, Record.OrderNo, "CT_INSPECTIONCALLRAISED")
+      Dim cnt As Integer = 0
+      For Each tmp As SIS.QCMCT.qcmctRequest In tmpCTs
+        cnt += 1
+        With tmp
+          .QCRequestNo = Record.RequestID
+          .SerialNo = cnt
+          .Project = Record.ProjectID
+          .PONumber = Record.OrderNo
+          .Handle = "CT_INSPECTIONCALLRAISED"
+          .PartialOrFull = "PARTIAL"
+          .InspectionStageiD = 2
+          .ProgressWeight = 0.0000
+          .ProgressPercent = 0.0000
+          .PercentOfQuantity = 0.0000
+          .GridLineStatus = 0
+        End With
+        tmp = SIS.QCMCT.qcmctRequest.InsertData(tmp)
+      Next
+    End Sub
     Public Shared Function UZ_qcmRequestsUpdate(ByVal Record As SIS.QCM.qcmRequests) As SIS.QCM.qcmRequests
       Dim _Result As SIS.QCM.qcmRequests = qcmRequestsUpdate(Record)
       Return _Result
@@ -107,11 +129,33 @@ Namespace SIS.QCM
         .CreatedOn = Now
         .RequestStateID = "UNDERALLOT"
       End With
+      'Check Progress data
+      Dim NoProgress As Boolean = True
+      Dim POIrefs As List(Of SIS.QCMCT.qcmctRequest) = SIS.QCMCT.qcmctRequest.UZ_qcmctRequestSelectList(0, 999, "", False, "", oReq.RequestID)
+      For Each iref As SIS.QCMCT.qcmctRequest In POIrefs
+        If Convert.ToDecimal(iref.ProgressPercent) > 0 Or Convert.ToDecimal(iref.ProgressWeight) > 0 Then
+          NoProgress = False
+        End If
+      Next
+      'if progress recorded, then delete un used rows not required
+      'If Not NoProgress Then
+      '  For Each iref As SIS.QCMCT.qcmctRequest In POIrefs
+      '    If Convert.ToDecimal(iref.ProgressPercent) <= 0 Then
+      '      SIS.QCMCT.qcmctRequest.qcmctRequestDelete(iref)
+      '    End If
+      '  Next
+      'End If
+      If POIrefs.Count > 0 Then
+        If NoProgress Then
+          Throw New Exception("No progress entered, can not forward.")
+        End If
+      End If
       Try
         SIS.QCM.qcmRequests.UpdateData(oReq)
       Catch ex As Exception
         Return False
       End Try
+      SIS.CT.ctUpdates.CT_ManualQCRequest(oReq)
       Return True
     End Function
     Public Shared Function ReturnToRequester(ByVal RequestID As Integer, ByVal Remarks As String) As Boolean

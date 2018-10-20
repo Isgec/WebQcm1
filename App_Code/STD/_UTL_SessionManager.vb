@@ -75,47 +75,59 @@ Namespace SIS.SYS.Utilities
         .Session.Abandon()
       End With
     End Sub
+    Public Class lgNavBar
+      Public Property Target As String = ""
+      Public Property Source As String = ""
+      Public Sub New(ByVal targetUrl As String, ByVal sourceUrl As String)
+        Target = targetUrl
+        Source = sourceUrl
+      End Sub
+      Sub New()
+        'dummy  
+      End Sub
+    End Class
     Public Shared Sub InitNavBar()
-      With HttpContext.Current
-        Dim abc(,) As String
-        ReDim abc(1, 0)
-        abc(0, 0) = ""
-        abc(1, 0) = ""
-        .Session("NavBar") = abc
-      End With
+      HttpContext.Current.Session("NavBar") = New List(Of lgNavBar)
     End Sub
-    Public Shared Sub PushNavBar(ByVal Page As String, ByVal url As String)
-      If url.IndexOf("skip=1") > -1 Then Return
-      With HttpContext.Current
-        Dim abc(,) As String = .Session("NavBar")
-        Dim curSize As Integer = abc.GetLength(1)
-        Dim Found As Boolean = False
-        For I As Integer = 0 To curSize - 1
-          If abc(0, I) = Page Then
-            Found = True
-            ReDim Preserve abc(1, I)
-            Exit For
+    Public Shared Sub PushNavBar(ByVal Target As String, ByVal Source As String)
+      Dim tmpNav As List(Of lgNavBar) = HttpContext.Current.Session("NavBar")
+      Dim SourceFoundInTarget As Boolean = False
+      Dim SourceFound As Boolean = False
+      Dim tmp As lgNavBar = Nothing
+      If tmpNav.Count > 0 Then
+        tmp = tmpNav(tmpNav.Count - 1)
+        If tmp.Target <> Target Then
+          If tmp.Source = Target Then
+            tmpNav.Remove(tmp)
+          Else
+            tmpNav.Add(New lgNavBar(Target, Source))
+            HttpContext.Current.Session("NavBar") = tmpNav
           End If
-        Next
-        If Not Found Then
-          Dim newSize As Integer = abc.GetLength(1)
-          ReDim Preserve abc(1, newSize)
-          abc(0, newSize) = Page
-          abc(1, newSize) = url
         End If
-        .Session("NavBar") = abc
-      End With
+      Else
+        tmpNav.Add(New lgNavBar(Target, Source))
+        HttpContext.Current.Session("NavBar") = tmpNav
+      End If
     End Sub
     Public Shared Function PopNavBar() As String
       Dim mRet As String = HttpContext.Current.Session("ApplicationDefaultPage")
-      With HttpContext.Current
-        Dim abc(,) As String = .Session("NavBar")
-        Dim curSize As Integer = abc.GetLength(1)
-        If curSize > 1 Then
-          mRet = abc(1, curSize - 1)
+      Dim tmp As lgNavBar = Nothing
+      Dim tmpNav As List(Of lgNavBar) = HttpContext.Current.Session("NavBar")
+      If tmpNav.Count > 0 Then
+        Do While tmpNav.Count > 0
+          tmp = tmpNav(tmpNav.Count - 1)
+          If tmp.Source.IndexOf("AF_") > -1 Then
+            tmpNav.Remove(tmp)
+            tmp = Nothing
+          Else
+            Exit Do
+          End If
+        Loop
+        If tmp IsNot Nothing Then
+          mRet = tmp.Source
         End If
-        .Session("NavBar") = abc
-      End With
+      End If
+      HttpContext.Current.Session("NavBar") = tmpNav
       Return mRet
     End Function
   End Class

@@ -662,8 +662,17 @@
 	End Sub
 	Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
 		If Not Page.IsPostBack And Not Page.IsCallback Then
+      Dim MayPush As Boolean = False
       Try
-        SIS.SYS.Utilities.SessionManager.PushNavBar(System.Web.HttpContext.Current.Request.Url.ToString, Request.UrlReferrer.AbsoluteUri)
+        If Request.UrlReferrer.AbsoluteUri IsNot Nothing Then
+          MayPush = True
+        End If
+      Catch ex As Exception
+      End Try
+      Try
+        If MayPush Then
+          SIS.SYS.Utilities.SessionManager.PushNavBar(System.Web.HttpContext.Current.Request.Url.ToString, Request.UrlReferrer.AbsoluteUri)
+        End If
       Catch ex As Exception
         'SIS.SYS.Utilities.SessionManager.DestroySessionEnvironement()
         'Response.Redirect("~/SISError.aspx")

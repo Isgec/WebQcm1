@@ -21,8 +21,12 @@
 	DefaultMode = "Insert" CssClass="sis_formview">
 	<InsertItemTemplate>
     <div id="frmdiv" class="ui-widget-content minipage">
-    <asp:Label ID="L_ErrMsgqcmRequests" runat="server" ForeColor="Red" Font-Bold="true" Text=""></asp:Label>
     <table style="margin:auto;border: solid 1pt lightgrey">
+      <tr>
+        <td colspan="4" style="text-align:right;">
+          <asp:Label ID="L_ErrMsgqcmRequests" runat="server" ForeColor="Red" Font-Bold="true" Text=""></asp:Label>
+        </td>
+      </tr>
 			<tr>
 				<td class="alignright">
 					<b><asp:Label ID="L_RequestID" ForeColor="#CC6633" runat="server" Text="Request ID :" /></b>
@@ -30,58 +34,6 @@
 				<td>
 					<asp:TextBox ID="F_RequestID" Enabled="False" CssClass="mypktxt" width="70px" runat="server" Text="0" />
 				</td>
-			</tr>
-			<tr>
-				<td class="alignright">
-					<b><asp:Label ID="L_ProjectID" runat="server" Text="Project ID :" /></b>
-				</td>
-        <td>
-					<asp:TextBox
-						ID = "F_ProjectID"
-						CssClass = "myfktxt"
-            Width="72px"
-						Text='<%# Bind("ProjectID") %>'
-						AutoCompleteType = "None"
-						onfocus = "return this.select();"
-            ToolTip="Enter Project ID."
-						ValidationGroup = "qcmRequests"
-            onblur= "script_qcmRequests.validate_ProjectID(this);"
-						Runat="Server" />
-					<asp:Label
-						ID = "F_ProjectID_Display"
-						Text='<%# Eval("IDM_Projects6_Description") %>'
-						Runat="Server" />
-					<asp:RequiredFieldValidator 
-						ID = "RFVProjectID"
-						runat = "server"
-						ControlToValidate = "F_ProjectID"
-						Text = "[Required!]"
-						ErrorMessage = "[Required!]"
-						Display = "Dynamic"
-						EnableClientScript = "true"
-						ValidationGroup = "qcmRequests"
-            ForeColor="Red" 
-						SetFocusOnError="true" />
-          <AJX:AutoCompleteExtender
-            ID="ACEProjectID"
-            BehaviorID="B_ACEProjectID"
-            ContextKey=""
-            UseContextKey="true"
-            ServiceMethod="ProjectIDCompletionList"
-            TargetControlID="F_ProjectID"
-            EnableCaching="false"
-            CompletionInterval="100"
-            FirstRowSelected="true"
-            MinimumPrefixLength="1"
-            OnClientItemSelected="script_qcmRequests.ACEProjectID_Selected"
-            OnClientPopulating="script_qcmRequests.ACEProjectID_Populating"
-            OnClientPopulated="script_qcmRequests.ACEProjectID_Populated"
-            CompletionSetCount="10"
-						CompletionListCssClass = "autocomplete_completionListElement"
-						CompletionListItemCssClass = "autocomplete_listItem"
-						CompletionListHighlightedItemCssClass = "autocomplete_highlightedListItem"
-            Runat="Server" />
-        </td>
 			</tr>
 			<tr>
 				<td class="alignright">
@@ -93,10 +45,10 @@
 						CssClass = "mytxt"
 						onfocus = "return this.select();"
 						ValidationGroup="qcmRequests"
-            onblur= "this.value=this.value.replace(/\'/g,'');"
+            onblur="script_erpPO.validate_ERPPONumber(this);"
             ToolTip="Enter Purchase Order No."
-						MaxLength="80"
-            Width="350px"
+						MaxLength="9"
+            Width="90px"
 						runat="server" />
 					<asp:RequiredFieldValidator 
 						ID = "RFVOrderNo"
@@ -109,7 +61,41 @@
 						ValidationGroup = "qcmRequests"
             ForeColor="Red" 
 						SetFocusOnError="true" />
+          <asp:Label ID="D_ERPPONumber" runat="server" Text=""></asp:Label>
 				</td>
+			</tr>
+			<tr>
+				<td class="alignright">
+					<b><asp:Label ID="Label2" runat="server" Text="PO Weight [Kg] :" /></b>
+				</td>
+				<td>
+					<asp:TextBox ID="F_POWeight"
+						Text='<%# Bind("POWeight") %>'
+						CssClass = "dmytxt"
+            Width="90px"
+            Enabled="False" 
+            style="text-align:right;"
+						runat="server" />
+				</td>
+			</tr>
+			<tr>
+				<td class="alignright">
+					<b><asp:Label ID="L_ProjectID" runat="server" Text="Project ID :" /></b>
+				</td>
+        <td>
+					<asp:TextBox
+						ID = "F_ProjectID"
+						CssClass = "dmytxt"
+            Width="72px"
+						Text='<%# Bind("ProjectID") %>'
+						ValidationGroup = "qcmRequests"
+            onblur= "script_qcmRequests.validate_ProjectID(this);"
+						Runat="Server" />
+					<asp:Label
+						ID = "F_ProjectID_Display"
+						Text='<%# Eval("IDM_Projects6_Description") %>'
+						Runat="Server" />
+        </td>
 			</tr>
 			<tr>
 				<td class="alignright">
@@ -118,12 +104,9 @@
         <td>
 					<asp:TextBox
 						ID = "F_SupplierID"
-						CssClass = "myfktxt"
+						CssClass = "dmytxt"
             Width="92px"
 						Text='<%# Bind("SupplierID") %>'
-						AutoCompleteType = "None"
-						onfocus = "return this.select();"
-            ToolTip="Enter Supplier ID."
 						ValidationGroup = "qcmRequests"
             onblur= "script_qcmRequests.validate_SupplierID(this);"
 						Runat="Server" />
@@ -131,36 +114,6 @@
 						ID = "F_SupplierID_Display"
 						Text='<%# Eval("IDM_Vendors7_Description") %>'
 						Runat="Server" />
-					<asp:RequiredFieldValidator 
-						ID = "RFVSupplierID"
-						runat = "server"
-						ControlToValidate = "F_SupplierID"
-						Text = "[Required!]"
-						ErrorMessage = "[Required!]"
-						Display = "Dynamic"
-						EnableClientScript = "true"
-						ValidationGroup = "qcmRequests"
-            ForeColor="Red" 
-						SetFocusOnError="true" />
-          <AJX:AutoCompleteExtender
-            ID="ACESupplierID"
-            BehaviorID="B_ACESupplierID"
-            ContextKey=""
-            UseContextKey="true"
-            ServiceMethod="SupplierIDCompletionList"
-            TargetControlID="F_SupplierID"
-            EnableCaching="false"
-            CompletionInterval="100"
-            FirstRowSelected="true"
-            MinimumPrefixLength="1"
-            OnClientItemSelected="script_qcmRequests.ACESupplierID_Selected"
-            OnClientPopulating="script_qcmRequests.ACESupplierID_Populating"
-            OnClientPopulated="script_qcmRequests.ACESupplierID_Populated"
-            CompletionSetCount="10"
-						CompletionListCssClass = "autocomplete_completionListElement"
-						CompletionListItemCssClass = "autocomplete_listItem"
-						CompletionListHighlightedItemCssClass = "autocomplete_highlightedListItem"
-            Runat="Server" />
         </td>
 			</tr>
 			<tr>

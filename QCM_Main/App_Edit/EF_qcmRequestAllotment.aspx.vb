@@ -148,58 +148,62 @@ Partial Class EF_qcmRequestAllotment
   '	End If
   'End Sub
   Protected Sub cmdSchedule_Click(ByVal sender As Object, ByVal e As System.EventArgs)
-    Dim oAllotedTo As TextBox = FVqcmRequestAllotment.FindControl("F_AllotedTo")
-    Dim oF_AllotedStartDate As TextBox = FVqcmRequestAllotment.FindControl("F_AllotedStartDate")
-    Dim AllotedTo As String = oAllotedTo.Text
-    Dim oReqs As List(Of SIS.QCM.qcmRequests) = Nothing
-    Dim ForDate As DateTime = Now
-    If oF_AllotedStartDate.Text <> String.Empty Then
-      ForDate = Convert.ToDateTime(oF_AllotedStartDate.Text)
-    End If
-    If AllotedTo = String.Empty Then
-      oReqs = SIS.QCM.qcmRequests.GetAllotedToByCreatedByForMonthYear(ForDate)
-    Else
-      oReqs = SIS.QCM.qcmRequests.GetAllotedToByAllotedToForMonthYear(AllotedTo, ForDate)
-    End If
-    Dim oTbl As New Table
+		Dim oAllotedTo As TextBox = FVqcmRequestAllotment.FindControl("F_AllotedTo")
+		Dim oF_AllotedStartDate As TextBox = FVqcmRequestAllotment.FindControl("F_AllotedStartDate")
+		Dim AllotedTo As String = oAllotedTo.Text
+		Dim oReqs As List(Of SIS.QCM.qcmRequests) = Nothing
+		Dim ForDate As DateTime = Now
+		If oF_AllotedStartDate.Text <> String.Empty Then
+			ForDate = Convert.ToDateTime(oF_AllotedStartDate.Text)
+		End If
+		If AllotedTo = String.Empty Then
+			oReqs = SIS.QCM.qcmRequests.GetAllotedToByCreatedByForMonthYear(ForDate)
+		Else
+			oReqs = SIS.QCM.qcmRequests.GetAllotedToByAllotedToForMonthYear(AllotedTo, ForDate)
+		End If
+		Dim oTbl As New Table
 
-    Dim row As TableRow = Nothing
-    Dim col As TableCell = Nothing
-    For Each req As SIS.QCM.qcmRequests In oReqs
-      row = New TableRow
+		Dim row As TableRow = Nothing
+		Dim col As TableCell = Nothing
+		For Each req As SIS.QCM.qcmRequests In oReqs
+			row = New TableRow
 
-      col = New TableCell
-      col.BorderStyle = BorderStyle.Solid
-      col.BorderColor = Drawing.Color.Black
-      col.BorderWidth = Unit.Point(1)
-      col.Text = req.HRM_Employees2_EmployeeName
-      row.Cells.Add(col)
 
-      col = New TableCell
-      col.BorderStyle = BorderStyle.Solid
-      col.BorderColor = Drawing.Color.Black
-      col.BorderWidth = Unit.Point(1)
-      col.Text = req.AllotedStartDate
-      row.Cells.Add(col)
+			col = New TableCell
+			col.BorderStyle = BorderStyle.Solid
+			col.BorderColor = Drawing.Color.Black
+			col.BorderWidth = Unit.Point(1)
+			col.Text = req.HRM_Employees2_EmployeeName
+			row.Cells.Add(col)
 
-      col = New TableCell
-      col.BorderStyle = BorderStyle.Solid
-      col.BorderColor = Drawing.Color.Black
-      col.BorderWidth = Unit.Point(1)
-      col.Text = req.AllotedFinishDate
-      row.Cells.Add(col)
+			col = New TableCell
+			col.BorderStyle = BorderStyle.Solid
+			col.BorderColor = Drawing.Color.Black
+			col.BorderWidth = Unit.Point(1)
+			col.Text = req.AllotedStartDate
+			row.Cells.Add(col)
 
-      col = New TableCell
-      col.BorderStyle = BorderStyle.Solid
-      col.BorderColor = Drawing.Color.Black
-      col.BorderWidth = Unit.Point(1)
-      col.Text = req.IDM_Vendors7_Description
-      row.Cells.Add(col)
-      oTbl.Rows.Add(row)
-    Next
-    Dim oPnlSchedule As Panel = FVqcmRequestAllotment.FindControl("pnlSchedule")
-    oPnlSchedule.Controls.Add(oTbl)
-  End Sub
+			col = New TableCell
+			col.BorderStyle = BorderStyle.Solid
+			col.BorderColor = Drawing.Color.Black
+			col.BorderWidth = Unit.Point(1)
+			col.Text = req.AllotedFinishDate
+			row.Cells.Add(col)
+
+			col = New TableCell
+			col.BorderStyle = BorderStyle.Solid
+			col.BorderColor = Drawing.Color.Black
+			col.BorderWidth = Unit.Point(1)
+			col.Text = req.IDM_Vendors7_Description
+			row.Cells.Add(col)
+
+			oTbl.Rows.Add(row)
+		Next
+
+		Dim oPnlSchedule As Panel = FVqcmRequestAllotment.FindControl("pnlSchedule")
+		oPnlSchedule.Controls.Add(oTbl)
+
+	End Sub
 
   Private Sub ODSqcmRequestAllotment_Selected(sender As Object, e As ObjectDataSourceStatusEventArgs) Handles ODSqcmRequestAllotment.Selected
     Dim oRequest As SIS.QCM.qcmRequestAllotment = CType(e.ReturnValue, SIS.QCM.qcmRequestAllotment)

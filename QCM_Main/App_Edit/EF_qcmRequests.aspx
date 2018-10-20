@@ -38,58 +38,6 @@
 			</tr>
 			<tr>
 				<td class="alignright">
-					<b><asp:Label ID="L_ProjectID" runat="server" Text="Project ID :" /></b>
-				</td>
-        <td>
-					<asp:TextBox
-						ID = "F_ProjectID"
-						CssClass = "myfktxt"
-            Width="72px"
-						Text='<%# Bind("ProjectID") %>'
-						AutoCompleteType = "None"
-						onfocus = "return this.select();"
-            ToolTip="Enter Project ID."
-						ValidationGroup = "qcmRequests"
-            onblur= "script_qcmRequests.validate_ProjectID(this);"
-						Runat="Server" />
-					<asp:Label
-						ID = "F_ProjectID_Display"
-						Text='<%# Eval("IDM_Projects6_Description") %>'
-						Runat="Server" />
-					<asp:RequiredFieldValidator 
-						ID = "RFVProjectID"
-						runat = "server"
-						ControlToValidate = "F_ProjectID"
-						Text = "[Required!]"
-						ErrorMessage = "[Required!]"
-						Display = "Dynamic"
-						EnableClientScript = "true"
-						ValidationGroup = "qcmRequests"
-            ForeColor="Red" 
-						SetFocusOnError="true" />
-          <AJX:AutoCompleteExtender
-            ID="ACEProjectID"
-            BehaviorID="B_ACEProjectID"
-            ContextKey=""
-            UseContextKey="true"
-            ServiceMethod="ProjectIDCompletionList"
-            TargetControlID="F_ProjectID"
-            EnableCaching="false"
-            CompletionInterval="100"
-            FirstRowSelected="true"
-            MinimumPrefixLength="1"
-            OnClientItemSelected="script_qcmRequests.ACEProjectID_Selected"
-            OnClientPopulating="script_qcmRequests.ACEProjectID_Populating"
-            OnClientPopulated="script_qcmRequests.ACEProjectID_Populated"
-            CompletionSetCount="10"
-						CompletionListCssClass = "autocomplete_completionListElement"
-						CompletionListItemCssClass = "autocomplete_listItem"
-						CompletionListHighlightedItemCssClass = "autocomplete_highlightedListItem"
-            Runat="Server" />
-        </td>
-			</tr>
-			<tr>
-				<td class="alignright">
 					<b><asp:Label ID="L_OrderNo" runat="server" Text="Purchase Order No :" /></b>
 				</td>
 				<td>
@@ -98,10 +46,10 @@
 						CssClass = "mytxt"
 						onfocus = "return this.select();"
 						ValidationGroup="qcmRequests"
-            onblur= "this.value=this.value.replace(/\'/g,'');"
+            onblur="script_erpPO.validate_ERPPONumber(this);"
             ToolTip="Enter Purchase Order No."
-						MaxLength="80"
-            Width="350px"
+						MaxLength="9"
+            Width="90px"
 						runat="server" />
 					<asp:RequiredFieldValidator 
 						ID = "RFVOrderNo"
@@ -118,17 +66,47 @@
 			</tr>
 			<tr>
 				<td class="alignright">
+					<b><asp:Label ID="Label2" runat="server" Text="PO Weight [Kg] :" /></b>
+				</td>
+				<td>
+					<asp:TextBox ID="F_POWeight"
+						Text='<%# Bind("POWeight") %>'
+						CssClass = "dmytxt"
+            Width="90px"
+            Enabled="False"
+            style="text-align:right;"
+						runat="server" />
+				</td>
+			</tr>
+			<tr>
+				<td class="alignright">
+					<b><asp:Label ID="L_ProjectID" runat="server" Text="Project ID :" /></b>
+				</td>
+        <td>
+					<asp:TextBox
+						ID = "F_ProjectID"
+						CssClass = "dmytxt"
+            Width="72px"
+						Text='<%# Bind("ProjectID") %>'
+						ValidationGroup = "qcmRequests"
+            onblur= "script_qcmRequests.validate_ProjectID(this);"
+						Runat="Server" />
+					<asp:Label
+						ID = "F_ProjectID_Display"
+						Text='<%# Eval("IDM_Projects6_Description") %>'
+						Runat="Server" />
+        </td>
+			</tr>
+			<tr>
+				<td class="alignright">
 					<b><asp:Label ID="L_SupplierID" runat="server" Text="Supplier ID :" /></b>
 				</td>
         <td>
 					<asp:TextBox
 						ID = "F_SupplierID"
-						CssClass = "myfktxt"
+						CssClass = "dmytxt"
             Width="92px"
 						Text='<%# Bind("SupplierID") %>'
-						AutoCompleteType = "None"
-						onfocus = "return this.select();"
-            ToolTip="Enter Supplier ID."
 						ValidationGroup = "qcmRequests"
             onblur= "script_qcmRequests.validate_SupplierID(this);"
 						Runat="Server" />
@@ -136,36 +114,6 @@
 						ID = "F_SupplierID_Display"
 						Text='<%# Eval("IDM_Vendors7_Description") %>'
 						Runat="Server" />
-					<asp:RequiredFieldValidator 
-						ID = "RFVSupplierID"
-						runat = "server"
-						ControlToValidate = "F_SupplierID"
-						Text = "[Required!]"
-						ErrorMessage = "[Required!]"
-						Display = "Dynamic"
-						EnableClientScript = "true"
-						ValidationGroup = "qcmRequests"
-            ForeColor="Red" 
-						SetFocusOnError="true" />
-          <AJX:AutoCompleteExtender
-            ID="ACESupplierID"
-            BehaviorID="B_ACESupplierID"
-            ContextKey=""
-            UseContextKey="true"
-            ServiceMethod="SupplierIDCompletionList"
-            TargetControlID="F_SupplierID"
-            EnableCaching="false"
-            CompletionInterval="100"
-            FirstRowSelected="true"
-            MinimumPrefixLength="1"
-            OnClientItemSelected="script_qcmRequests.ACESupplierID_Selected"
-            OnClientPopulating="script_qcmRequests.ACESupplierID_Populating"
-            OnClientPopulated="script_qcmRequests.ACESupplierID_Populated"
-            CompletionSetCount="10"
-						CompletionListCssClass = "autocomplete_completionListElement"
-						CompletionListItemCssClass = "autocomplete_listItem"
-						CompletionListHighlightedItemCssClass = "autocomplete_highlightedListItem"
-            Runat="Server" />
         </td>
 			</tr>
 			<tr>
@@ -499,12 +447,146 @@
 		</table>
 <fieldset class="ui-widget-content page">
 <legend>
+    <asp:Label ID="LabelqcmctRequest" runat="server" Text="&nbsp;List: CT Request"></asp:Label>
+</legend>
+<div class="pagedata">
+<asp:UpdatePanel ID="UPNLqcmctRequest" runat="server">
+  <ContentTemplate>
+    <table width="100%"><tr><td class="sis_formview"> 
+    <LGM:ToolBar0 
+      ID = "TBLqcmctRequest"
+      ToolType = "lgNMGrid"
+      EditUrl = "~/QCMCT_Main/App_Edit/EF_qcmctRequest.aspx"
+      EnableExit = "false"
+      EnableAdd="False"
+      ValidationGroup = "qcmctRequest"
+      runat = "server" />
+    <asp:UpdateProgress ID="UPGSqcmctRequest" runat="server" AssociatedUpdatePanelID="UPNLqcmctRequest" DisplayAfter="100">
+      <ProgressTemplate>
+        <span style="color: #ff0033">Loading...</span>
+      </ProgressTemplate>
+    </asp:UpdateProgress>
+    <asp:GridView ID="GVqcmctRequest" SkinID="gv_silver" runat="server" DataSourceID="ODSqcmctRequest" DataKeyNames="QCRequestNo,SerialNo,PONumber,ItemReference,ActivityID">
+      <Columns>
+        <asp:TemplateField HeaderText="EDIT">
+          <ItemTemplate>
+            <asp:ImageButton ID="cmdEditPage" ValidationGroup="Edit" runat="server" Visible='<%# EVal("Visible") %>' Enabled='<%# EVal("Enable") %>' AlternateText="Edit" ToolTip="Edit the record." SkinID="Edit" CommandName="lgEdit" CommandArgument='<%# Container.DataItemIndex %>' />
+          </ItemTemplate>
+          <ItemStyle CssClass="alignCenter" />
+          <HeaderStyle CssClass="alignCenter" Width="30px" />
+        </asp:TemplateField>
+        <asp:TemplateField HeaderText="PO Number" SortExpression="PONumber">
+          <ItemTemplate>
+            <asp:Label ID="LabelPONumber" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("PONumber") %>'></asp:Label>
+          </ItemTemplate>
+          <ItemStyle CssClass="alignCenter" />
+        <HeaderStyle CssClass="alignCenter" Width="50px" />
+        </asp:TemplateField>
+        <asp:TemplateField HeaderText="Item Reference" SortExpression="ItemReference">
+          <ItemTemplate>
+            <asp:Label ID="LabelItemReference" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# Bind("ItemReference") %>'></asp:Label>
+          </ItemTemplate>
+          <ItemStyle CssClass="alignleft" />
+        <HeaderStyle CssClass="alignCenter" Width="200px" />
+        </asp:TemplateField>
+        <asp:TemplateField HeaderText="Sub Item" SortExpression="Activity2Desc">
+          <ItemTemplate>
+            <asp:Label ID="LabelActivity2Desc" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("Activity2Desc") %>'></asp:Label>
+          </ItemTemplate>
+          <ItemStyle CssClass="alignleft" />
+        <HeaderStyle CssClass="alignCenter" Width="200px" />
+        </asp:TemplateField>
+        <asp:TemplateField HeaderText="Quantity" SortExpression="Quantity">
+          <ItemTemplate>
+            <asp:Label ID="LabelQuantity" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("Quantity") %>'></asp:Label>
+          </ItemTemplate>
+          <ItemStyle CssClass="alignCenter" />
+          <HeaderStyle CssClass="alignCenter" Width="80px" />
+        </asp:TemplateField>
+        <asp:TemplateField HeaderText="Iref. Weight [Kg]" SortExpression="IrefWeight">
+          <ItemTemplate>
+            <asp:Label ID="LabelIrefWeight" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("IrefWeight") %>'></asp:Label>
+          </ItemTemplate>
+          <ItemStyle CssClass="alignCenter" />
+          <HeaderStyle CssClass="alignCenter" Width="80px" />
+        </asp:TemplateField>
+        <asp:TemplateField HeaderText="Partial Or Full" SortExpression="PartialOrFull">
+          <ItemTemplate>
+            <asp:Label ID="LabelPartialOrFull" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# Bind("PartialOrFull") %>'></asp:Label>
+          </ItemTemplate>
+          <ItemStyle CssClass="alignCenter" />
+        <HeaderStyle CssClass="alignCenter" Width="50px" />
+        </asp:TemplateField>
+        <asp:TemplateField HeaderText="% Progress" SortExpression="ProgressPercent">
+          <ItemTemplate>
+            <asp:Label ID="LabelPercentOfQuantity" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# Bind("ProgressPercent") %>'></asp:Label>
+          </ItemTemplate>
+          <ItemStyle CssClass="alignCenter" />
+          <HeaderStyle CssClass="alignCenter" Width="80px" />
+        </asp:TemplateField>
+        <asp:TemplateField HeaderText="Progress Weight [Kg]" SortExpression="ProgressWeight">
+          <ItemTemplate>
+            <asp:Label ID="LabelProgressWeight" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("ProgressWeight") %>'></asp:Label>
+          </ItemTemplate>
+          <ItemStyle CssClass="alignCenter" />
+          <HeaderStyle CssClass="alignCenter" Width="80px" />
+        </asp:TemplateField>
+        <asp:TemplateField HeaderText="Inspection Stage" SortExpression="QCM_InspectionStages1_Description">
+          <ItemTemplate>
+             <asp:Label ID="L_InspectionStageiD" runat="server" ForeColor='<%# Eval("ForeColor") %>' Title='<%# EVal("InspectionStageiD") %>' Text='<%# Eval("QCM_InspectionStages1_Description") %>'></asp:Label>
+          </ItemTemplate>
+          <HeaderStyle Width="100px" />
+        </asp:TemplateField>
+      </Columns>
+      <EmptyDataTemplate>
+        <asp:Label ID="LabelEmpty" runat="server" Font-Size="Small" ForeColor="Red" Text="No record found !!!"></asp:Label>
+      </EmptyDataTemplate>
+    </asp:GridView>
+    <asp:ObjectDataSource 
+      ID = "ODSqcmctRequest"
+      runat = "server"
+      DataObjectTypeName = "SIS.QCMCT.qcmctRequest"
+      OldValuesParameterFormatString = "original_{0}"
+      SelectMethod = "UZ_qcmctRequestSelectList"
+      TypeName = "SIS.QCMCT.qcmctRequest"
+      SelectCountMethod = "qcmctRequestSelectCount"
+      SortParameterName="OrderBy" EnablePaging="True">
+      <SelectParameters >
+        <asp:ControlParameter ControlID="F_RequestID" PropertyName="Text" Name="QCRequestNo" Type="Int32" Size="10" />
+        <asp:Parameter Name="SearchState" Type="Boolean" Direction="Input" DefaultValue="false" />
+        <asp:Parameter Name="SearchText" Type="String" Direction="Input" DefaultValue="" />
+      </SelectParameters>
+    </asp:ObjectDataSource>
+    <br />
+  </td></tr></table>
+  </ContentTemplate>
+  <Triggers>
+    <asp:AsyncPostBackTrigger ControlID="GVqcmctRequest" EventName="PageIndexChanged" />
+  </Triggers>
+</asp:UpdatePanel>
+</div>
+</fieldset>
+<fieldset class="ui-widget-content page">
+<legend>
     <asp:Label ID="LabelqcmRequestFiles" runat="server" Text="&nbsp;List: Request Attachments" Width="100%" CssClass="sis_formheading"></asp:Label>
 </legend>
 <div class="pagedata">
 	<asp:UpdatePanel ID="UPNLqcmRequestFiles" runat="server">
   <ContentTemplate>
     <table width="100%"><tr><td class="sis_formview"> 
+		<table id="F_Upload" runat="server" visible="<%# Editable %>" >
+			<tr>
+				<td>
+					<asp:Label ID="L_FileUpload" runat="server" Font-Bold="true" Text="Attatch File :"></asp:Label>
+				</td>
+				<td style="text-align:left">
+						<asp:FileUpload ID="F_FileUpload" runat="server" Width="250px" ToolTip="Attatch File" />
+				</td>
+				<td>
+					<asp:Button ID="cmdFileUpload" Text="Upload File" runat="server" ToolTip="Click to attatch file." CommandName="Upload" CommandArgument="" />
+				</td>
+			</tr>
+		</table>
     <LGM:ToolBar0 
       ID = "TBLqcmRequestFiles"
       ToolType = "lgNMGrid"
@@ -520,24 +602,6 @@
         <span style="color: #ff0033">Loading...</span>
       </ProgressTemplate>
     </asp:UpdateProgress>
-		<table id="F_Upload" runat="server" visible="<%# Editable %>" >
-			<tr>
-				<td>
-					<asp:Label ID="L_FileUpload" runat="server" Font-Bold="true" Text="Attatch File :"></asp:Label>
-				</td>
-				<td style="text-align:left">
-					<input type="text" id="fileName" style="width:500px" class="file_input_textbox" readonly="readonly">
-					 
-					<div class="file_input_div">
-						<input type="button" value="Search file" class="file_input_button" />
-						<asp:FileUpload ID="F_FileUpload" runat="server" Width="100%" Visible="<%# Editable %>" class="file_input_hidden" onchange="javascript: document.getElementById('fileName').value = this.value" ToolTip="Attatch File" />
-					</div>
-				</td>
-				<td>
-					<asp:Button ID="cmdFileUpload" CssClass="file_upload_button" Text="Upload File" runat="server" Visible="<%# Editable %>" ToolTip="Click to attatch file." CommandName="Upload" CommandArgument="" />
-				</td>
-			</tr>
-		</table>
     <asp:GridView ID="GVqcmRequestFiles" SkinID="gv_silver" BorderColor="#A9A9A9" width="100%" runat="server" AllowPaging="True" AllowSorting="True" AutoGenerateColumns="False" DataSourceID="ODSqcmRequestFiles" DataKeyNames="RequestID,SerialNo">
       <Columns>
         <asp:TemplateField>
@@ -552,13 +616,13 @@
         </asp:TemplateField>
         <asp:TemplateField HeaderText="Request ID" SortExpression="QCM_Requests1_Description">
           <ItemTemplate>
-             <asp:Label ID="L_RequestID" runat="server" ForeColor='<%# EVal("ForeColor") %>' Title='<%# EVal("RequestID") %>' Text='<%# Eval("QCM_Requests1_Description") %>'></asp:Label>
+             <asp:Label ID="L_RequestID" runat="server" ForeColor='<%# Eval("ForeColor") %>' Title='<%# EVal("RequestID") %>' Text='<%# Eval("QCM_Requests1_Description") %>'></asp:Label>
           </ItemTemplate>
           <HeaderStyle Width="100px" />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="SerialNo" SortExpression="SerialNo">
           <ItemTemplate>
-            <asp:Label ID="LabelSerialNo" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("SerialNo") %>'></asp:Label>
+            <asp:Label ID="LabelSerialNo" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# Bind("SerialNo") %>'></asp:Label>
           </ItemTemplate>
           <HeaderStyle CssClass="alignright" />
           <ItemStyle CssClass="alignright" />
@@ -566,7 +630,7 @@
         </asp:TemplateField>
         <asp:TemplateField HeaderText="File Name" SortExpression="FileName">
           <ItemTemplate>
-            <asp:LinkButton ID="LabelFileName" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("FileName") %>' CommandName="DownloadFile" CommandArgument='<%# Container.DataItemIndex %>' ></asp:LinkButton>
+            <asp:LinkButton ID="LabelFileName" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# Bind("FileName") %>' CommandName="DownloadFile" CommandArgument='<%# Container.DataItemIndex %>' ></asp:LinkButton>
           </ItemTemplate>
         <HeaderStyle Width="100px" />
         </asp:TemplateField>
@@ -601,6 +665,7 @@
 </div>
 </fieldset>
 </div>
+
 	</EditItemTemplate>
 </asp:FormView>
   </ContentTemplate>
