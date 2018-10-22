@@ -17,7 +17,7 @@ Namespace SIS.QCM
 			Dim mRet As Boolean = True
 			Return mRet
 		End Function
-    Public Shared Function GetBPFromERP(ByVal BPID As String) As SIS.QCM.qcmVendors
+    Public Shared Function GetBPFromERP(ByVal BPID As String, Optional ByVal mComp As String = "200") As SIS.QCM.qcmVendors
       Dim Results As SIS.QCM.qcmVendors = Nothing
       Dim Sql As String = ""
       Sql &= "select                                                           "
@@ -34,9 +34,9 @@ Namespace SIS.QCM
       Sql &= "  cnh.t_fuln as ContactPerson,                                   "
       Sql &= "  cnh.t_telp as ContactNo,                                       "
       Sql &= "  cnh.t_info as EMailID                                          "
-      Sql &= "  from ttccom100200 as suh                                       "
-      Sql &= "  left outer join ttccom130200 as adh on suh.t_cadr = adh.t_cadr "
-      Sql &= "  left outer join ttccom140200 as cnh on suh.t_ccnt = cnh.t_ccnt "
+      Sql &= "  from ttccom100" & mComp & " as suh                                       "
+      Sql &= "  left outer join ttccom130" & mComp & " as adh on suh.t_cadr = adh.t_cadr "
+      Sql &= "  left outer join ttccom140" & mComp & " as cnh on suh.t_ccnt = cnh.t_ccnt "
       Sql &= "  where suh.t_bpid ='" & BPID & "'"
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()

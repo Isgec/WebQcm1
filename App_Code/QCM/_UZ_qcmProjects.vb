@@ -17,16 +17,16 @@ Namespace SIS.QCM
 			Dim mRet As Boolean = True
 			Return mRet
 		End Function
-    Public Shared Function GetProjectFromERP(ByVal ProjectID As String) As SIS.QCM.qcmProjects
+    Public Shared Function GetProjectFromERP(ByVal ProjectID As String, Optional ByVal mComp As String = "200") As SIS.QCM.qcmProjects
       Dim Ret As SIS.QCM.qcmProjects = Nothing
       Dim Sql As String = ""
       Sql &= "select top 1  "
       Sql &= "  prh.t_cprj as ProjectID,  "
       Sql &= "  prd.t_dsca as Description, "
       Sql &= "  prb.t_ofbp as BusinessPartnerID "
-      Sql &= "  from ttppdm600200 as prh  "
-      Sql &= "  right outer join ttcmcs052200 as prd on prd.t_cprj=prh.t_cprj"
-      Sql &= "  right outer join ttppdm740200 as prb on prb.t_cprj=prh.t_cprj"
+      Sql &= "  from ttppdm600" & mComp & " as prh  "
+      Sql &= "  right outer join ttcmcs052" & mComp & " as prd on prd.t_cprj=prh.t_cprj"
+      Sql &= "  right outer join ttppdm740" & mComp & " as prb on prb.t_cprj=prh.t_cprj"
       Sql &= "  where prh.t_cprj ='" & ProjectID & "'"
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()

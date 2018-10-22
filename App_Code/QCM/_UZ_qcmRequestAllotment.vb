@@ -344,7 +344,7 @@ Namespace SIS.QCM
             .AppendLine("<td style=""vertical-align:middle;text-align:center"">")
             If tm.RequestStateID = "ALLOTED" Or tm.RequestStateID = "REALLOTED" Then
               mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
-              .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm2/QcmCallInspected.aspx?start=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Green; font-weight:bold;"">STARTED</a>")
+              .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?start=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Green; font-weight:bold;"">STARTED</a>")
             End If
             .AppendLine("</td>")
             .AppendLine("<td style=""vertical-align:middle;text-align:center"">")
@@ -352,7 +352,7 @@ Namespace SIS.QCM
               If Convert.ToDateTime(tm.CreatedOn) >= Convert.ToDateTime("26/07/2017") Then
                 If Not tm.Paused Then
                   mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
-                  .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm2/QcmData.aspx?data=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Green; font-weight:bold;"">INSPECTION DATA</a>")
+                  .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmData.aspx?data=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Green; font-weight:bold;"">INSPECTION DATA</a>")
                 End If
               End If
             End If
@@ -361,10 +361,10 @@ Namespace SIS.QCM
             If tm.RequestStateID = "INSPECTED" Then
               If Not tm.Paused Then
                 mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
-                .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm2/QcmCallInspected.aspx?pause=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Gold; font-weight:bold;"">PAUSE</a>")
+                .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?pause=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Gold; font-weight:bold;"">PAUSE</a>")
               Else
                 mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
-                .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm2/QcmCallInspected.aspx?resume=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Gold; font-weight:bold;"">RESUME</a>")
+                .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?resume=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Gold; font-weight:bold;"">RESUME</a>")
               End If
             End If
             .AppendLine("</td>")
@@ -374,7 +374,7 @@ Namespace SIS.QCM
                 Dim tmpIns As List(Of SIS.QCM.qcmInspections) = SIS.QCM.qcmInspections.qcmInspectionsSelectList(0, 10, "", False, "", tm.RequestID)
                 If tmpIns.Count > 1 Then
                   mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
-                  .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm2/QcmCallInspected.aspx?stop=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Green; font-weight:bold;"">CLOSED</a>")
+                  .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?stop=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Green; font-weight:bold;"">CLOSED</a>")
                 End If
               End If
             End If
