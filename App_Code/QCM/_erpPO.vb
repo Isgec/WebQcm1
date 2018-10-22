@@ -29,7 +29,7 @@ Namespace SIS.ERP
       mSql = mSql & "'' as SupplierAddress,    "
       mSql = mSql & "emp3.t_nama as BuyerName,"
       mSql = mSql & "bpe3.t_mail as BuyerEMailID, "
-      mSql = mSql & "  (select sum(case when t_wght=0 then t_qnty else t_wght end) from ttdisg002200 where t_orno='" & PONumber & "') As POWeight, "
+      mSql = mSql & "  (select sum(case when t_wght=0 then t_qnty else t_wght end) from ttdisg002" & mComp & " where t_orno='" & PONumber & "') As POWeight, "
       mSql = mSql & "bp01.t_nama as SupplierName "
       mSql = mSql & "from ttdpur400" & mComp & " as ordh "
       mSql = mSql & "left outer join ttccom001" & mComp & " as emp3 on ordh.t_ccon=emp3.t_emno "
