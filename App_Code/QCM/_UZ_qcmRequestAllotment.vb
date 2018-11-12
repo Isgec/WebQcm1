@@ -873,7 +873,11 @@ Namespace SIS.QCM
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Request ID</b></td>")
               .AppendLine("<td>" & Record.RequestID & "</td></tr>")
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Requested By</b></td>")
-              .AppendLine("<td>" & Record.FK_QCM_Requests_ReceivedBy.EmployeeName & "</td></tr>")
+              Try
+                .AppendLine("<td>" & Record.FK_QCM_Requests_ReceivedBy.EmployeeName & "</td></tr>")
+              Catch ex As Exception
+                .AppendLine("<td></td></tr>")
+              End Try
               .AppendLine("</table>")
             End With
             Try
@@ -968,7 +972,11 @@ Namespace SIS.QCM
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Request ID</b></td>")
               .AppendLine("<td>" & Record.RequestID & "</td></tr>")
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Requested By</b></td>")
-              .AppendLine("<td>" & Record.FK_QCM_Requests_ReceivedBy.EmployeeName & "</td></tr>")
+              Try
+                .AppendLine("<td>" & Record.FK_QCM_Requests_ReceivedBy.EmployeeName & "</td></tr>")
+              Catch ex As Exception
+                .AppendLine("<td></td></tr>")
+              End Try
               .AppendLine("</table>")
               .Append(GetPendigRequestHTML(Record.AllotedTo, mMailID))
             End With
@@ -1105,7 +1113,11 @@ Namespace SIS.QCM
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Request ID</b></td>")
               .AppendLine("<td>" & Record.RequestID & "</td></tr>")
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Requested By</b></td>")
-              .AppendLine("<td>" & Record.FK_QCM_Requests_ReceivedBy.EmployeeName & "</td></tr>")
+              Try
+                .AppendLine("<td>" & Record.FK_QCM_Requests_ReceivedBy.EmployeeName & "</td></tr>")
+              Catch ex As Exception
+                .AppendLine("<td></td></tr>")
+              End Try
               .AppendLine("</table>")
             End With
             Try
@@ -1244,7 +1256,11 @@ Namespace SIS.QCM
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Request ID</b></td>")
               .AppendLine("<td>" & Record.RequestID & "</td></tr>")
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Requested By</b></td>")
-              .AppendLine("<td>" & Record.FK_QCM_Requests_ReceivedBy.EmployeeName & "</td></tr>")
+              Try
+                .AppendLine("<td>" & Record.FK_QCM_Requests_ReceivedBy.EmployeeName & "</td></tr>")
+              Catch ex As Exception
+                .AppendLine("<td></td></tr>")
+              End Try
               .AppendLine("</table>")
             End With
             Try
