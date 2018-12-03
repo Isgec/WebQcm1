@@ -160,6 +160,8 @@ Partial Class QcmCallInspected
             mRet = SIS.QCM.qcmRequestAllotment.RequestStarted(tmp.RequestID)
             If mRet = String.Empty Then
               msg.Text = "<h1>Started successfully.</h1>"
+            Else
+              msg.Text = "<h1>" & mRet & "</h1>"
             End If
           Else
             msg.Text = "<h1>" & emsg & "</h1>"

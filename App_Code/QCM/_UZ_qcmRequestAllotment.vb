@@ -14,6 +14,7 @@ Namespace SIS.QCM
         mRet &= "<li>" & IDM_Projects6_Description & " [" & ProjectID & "]" & "</li>"
         mRet &= "<li>Order No: " & OrderNo & "</li>"
         mRet &= "<li>" & IDM_Vendors7_Description & "</li>"
+        mRet &= "<li>" & FK_QCM_Requests_Createdby.EmployeeName & "</li>"
         mRet &= "<li>" & AllotmentRemarks & "</li>"
         mRet &= "<li>Inspection Date: " & AllotedFinishDate & "</li>"
         Return mRet
@@ -94,6 +95,34 @@ Namespace SIS.QCM
         Return False
       End Get
     End Property
+    Public Shared Function UZ_qcmRequestAllotedToMobile(ByVal SearchState As Boolean, ByVal SearchText As String, ByVal AllotedTo As String) As List(Of SIS.QCM.qcmRequestAllotment)
+      Dim Results As List(Of SIS.QCM.qcmRequestAllotment) = Nothing
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.StoredProcedure
+          Cmd.CommandText = "spqcm_LG_RequestAllotedTo"
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@AllotedTo", SqlDbType.NVarChar, 8, AllotedTo)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@KeyWord", SqlDbType.NVarChar, 250, SearchText)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SearchState", SqlDbType.Bit, 3, SearchState)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@StartRowIndex", SqlDbType.Int, -1, 0)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@MaximumRows", SqlDbType.Int, -1, 9999)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OrderBy", SqlDbType.NVarChar, 50, "RequestID DESC")
+          Cmd.Parameters.Add("@RecordCount", SqlDbType.Int)
+          Cmd.Parameters("@RecordCount").Direction = ParameterDirection.Output
+          RecordCount = -1
+          Results = New List(Of SIS.QCM.qcmRequestAllotment)()
+          Con.Open()
+          Dim Reader As SqlDataReader = Cmd.ExecuteReader()
+          While (Reader.Read())
+            Results.Add(New SIS.QCM.qcmRequestAllotment(Reader))
+          End While
+          Reader.Close()
+          RecordCount = Cmd.Parameters("@RecordCount").Value
+        End Using
+      End Using
+      Return Results
+    End Function
     Public Shared Function UZ_qcmRequestAllotedTo(ByVal StartRowIndex As Integer, ByVal MaximumRows As Integer, ByVal OrderBy As String, ByVal SearchState As Boolean, ByVal SearchText As String, ByVal AllotedTo As String) As List(Of SIS.QCM.qcmRequestAllotment)
       Dim Results As List(Of SIS.QCM.qcmRequestAllotment) = Nothing
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
@@ -338,6 +367,7 @@ Namespace SIS.QCM
             .AppendLine("<li>" & tm.IDM_Projects6_Description & " [" & tm.ProjectID & "]" & "</li>")
             .AppendLine("<li>Order No: " & tm.OrderNo & "</li>")
             .AppendLine("<li>" & tm.IDM_Vendors7_Description & "</li>")
+            .AppendLine("<li>" & tm.FK_QCM_Requests_Createdby.EmployeeName & "</li>")
             .AppendLine("<li>" & tm.AllotmentRemarks & "</li>")
             .AppendLine("<li>Inspection Date: " & tm.AllotedFinishDate & "</li>")
             .AppendLine("</td>")
@@ -531,6 +561,11 @@ Namespace SIS.QCM
       Try
         Dim oReq As SIS.QCM.qcmRequests = SIS.QCM.qcmRequests.qcmRequestsGetByID(ReqID)
         If oReq.RequestStateID = "INSPECTED" Then Return "Already Started"
+        Dim InspectorID As String = HttpContext.Current.Session("LoginID")
+        Dim OtherStartedCount As Integer = SIS.QCM.qcmRequests.OtherStartedCall(InspectorID, ReqID)
+        If OtherStartedCount <> 0 Then
+          Return "More than one call can NOT be in STARTED/RESUMED state. Pl. close Call: " & OtherStartedCount & " first."
+        End If
         Dim oIns As New SIS.QCM.qcmInspections
         With oIns
           .RequestID = oReq.RequestID
@@ -973,7 +1008,8 @@ Namespace SIS.QCM
               .AppendLine("<td>" & Record.RequestID & "</td></tr>")
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Requested By</b></td>")
               Try
-                .AppendLine("<td>" & Record.FK_QCM_Requests_ReceivedBy.EmployeeName & "</td></tr>")
+                '.AppendLine("<td>" & Record.FK_QCM_Requests_ReceivedBy.EmployeeName & "</td></tr>")
+                .AppendLine("<td>" & Record.FK_QCM_Requests_Createdby.EmployeeName & "</td></tr>")
               Catch ex As Exception
                 .AppendLine("<td></td></tr>")
               End Try

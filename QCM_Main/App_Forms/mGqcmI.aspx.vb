@@ -1,6 +1,6 @@
 Imports System.Web.Script.Serialization
 Partial Class mG_qcmI
-  Inherits SIS.SYS.GridBase
+  Inherits System.Web.UI.Page
   Private Sub ODSqcmRequestAllotment_Selecting(sender As Object, e As ObjectDataSourceSelectingEventArgs) Handles ODSqcmRequestAllotment.Selecting
     '1. Check To Search
     If e.InputParameters("SearchText") Is Nothing Then e.InputParameters("SearchText") = ""
@@ -8,16 +8,6 @@ Partial Class mG_qcmI
       e.InputParameters("SearchState") = True
     End If
   End Sub
-  Private Sub GVqcmRequestAllotments_Init(sender As Object, e As EventArgs) Handles GVqcmRequestAllotment.Init
-    PageSize = 99
-    DataClassName = "qcmRequestAllotment"
-    SetGridView = GVqcmRequestAllotment
-  End Sub
-
-  Private Sub TBLqcmRequestAllotment_Init(sender As Object, e As EventArgs) Handles TBLqcmRequestAllotment.Init
-    SetToolBar = TBLqcmRequestAllotment
-  End Sub
-
   Private Sub GVqcmRequestAllotment_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles GVqcmRequestAllotment.RowCommand
     If e.CommandName.ToLower = "cmdStart".ToLower Then
       Dim RequestID As Integer = GVqcmRequestAllotment.DataKeys(e.CommandArgument).Value
@@ -36,7 +26,7 @@ Partial Class mG_qcmI
       Dim RequestID As Integer = GVqcmRequestAllotment.DataKeys(e.CommandArgument).Value
       Dim mRet As String = ""
       Try
-        Dim RedirectURL As String = "~/QcmData.aspx?data=" & RequestID & "&emp=" & HttpContext.Current.Session("LoginID")
+        Dim RedirectURL As String = "~/QcmData.aspx?data=" & RequestID & "&src=mapp&emp=" & HttpContext.Current.Session("LoginID")
         Response.Redirect(RedirectURL)
       Catch ex As Exception
         ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", "alert('" & New JavaScriptSerializer().Serialize(ex.Message) & "');", True)

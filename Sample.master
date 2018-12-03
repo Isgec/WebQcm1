@@ -74,7 +74,7 @@
   }
 
   .bsr_silver td, .bsa_silver td, .bss_silver td {
-    font-size: 10px;
+    font-size: 1em;
     border-bottom: 1pt solid #BCBCC3;
   }
 

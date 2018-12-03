@@ -2,6 +2,16 @@
 Partial Class QcmData
   Inherits System.Web.UI.Page
   Dim DataUpdated As Boolean = False
+
+  Private Sub FVqcmInspections_ItemCommand(sender As Object, e As FormViewCommandEventArgs) Handles FVqcmInspections.ItemCommand
+    If e.CommandName = "cmdCancel" Then
+      If Request.QueryString("src") IsNot Nothing Then
+        Dim RedirectURL As String = "~/QCM_Main/App_Forms/mGqcmI.aspx?LoginID=" & HttpContext.Current.Session("LoginID")
+        Response.Redirect(RedirectURL)
+      End If
+    End If
+  End Sub
+
   Private Sub FVqcmInspections_ItemInserted(sender As Object, e As FormViewInsertedEventArgs) Handles FVqcmInspections.ItemInserted
     maindiv.Visible = False
     If e.Exception IsNot Nothing Then
@@ -12,7 +22,6 @@ Partial Class QcmData
     subDiv.Visible = True
     DataUpdated = True
   End Sub
-
   Private Sub QcmData_PreRender(sender As Object, e As EventArgs) Handles Me.PreRender
     If DataUpdated Then Exit Sub
     HttpContext.Current.Session("LoginID") = "0340"

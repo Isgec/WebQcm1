@@ -297,7 +297,7 @@
                 <table style="margin:auto">
                   <tr>
                     <td style="text-align:center">
-                      <input type="button" value="Cancel" style="background-color:pink;color:red" onclick="self.close();return false;" />
+                      <asp:button ID="cmdCancel" runat="server" Text="Cancel" CommandName="cmdCancel" style="background-color:pink;color:red"  />
                     </td>
                     <td style="text-align:center">
                       <asp:Button ID="cmdSave" runat="server" Text="Save" BackColor="Lime" ForeColor="Green" CommandName="Insert"  />

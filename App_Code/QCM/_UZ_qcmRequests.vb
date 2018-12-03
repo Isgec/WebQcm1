@@ -72,6 +72,19 @@ Namespace SIS.QCM
       Dim mRet As Boolean = True
       Return mRet
     End Function
+    Public Shared Function OtherStartedCall(ByVal InspectedBy As String, ByVal RequestID As Int32) As Integer
+      Dim Results As Integer = 0
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.Text
+          Cmd.CommandText = "select top 1 isnull(requestid,0) as req from qcm_requests where allotedto='" & InspectedBy & "' and AllotedStartDate>=convert(datetime,'01/12/2018',103) and requeststateid='INSPECTED' and paused=0 and requestid<>" & RequestID
+          Con.Open()
+          Results = Cmd.ExecuteScalar
+        End Using
+      End Using
+      Return Results
+    End Function
+
     Public Shared Function UZ_qcmRequestsInsert(ByVal Record As SIS.QCM.qcmRequests) As SIS.QCM.qcmRequests
       Record = qcmRequestsInsert(Record)
       CreateItemReference(Record)
