@@ -13,6 +13,10 @@ Partial Class QcmData
   End Sub
 
   Private Sub FVqcmInspections_ItemInserted(sender As Object, e As FormViewInsertedEventArgs) Handles FVqcmInspections.ItemInserted
+    If Request.QueryString("src") IsNot Nothing Then
+      Dim RedirectURL As String = "~/QCM_Main/App_Forms/mGqcmI.aspx?LoginID=" & HttpContext.Current.Session("LoginID")
+      Response.Redirect(RedirectURL)
+    End If
     maindiv.Visible = False
     If e.Exception IsNot Nothing Then
       msg.Text = e.Exception.Message

@@ -100,7 +100,7 @@ Namespace SIS.QCM
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
-          Cmd.CommandText = "spqcm_LG_RequestAllotedTo"
+          Cmd.CommandText = "spqcm_LG_RequestAllotedToMobile"
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@AllotedTo", SqlDbType.NVarChar, 8, AllotedTo)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@KeyWord", SqlDbType.NVarChar, 250, SearchText)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SearchState", SqlDbType.Bit, 3, SearchState)

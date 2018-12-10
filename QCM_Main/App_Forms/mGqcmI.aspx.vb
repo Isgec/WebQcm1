@@ -66,10 +66,10 @@ Partial Class mG_qcmI
         If mRet <> String.Empty Then
           ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", "alert('" & New JavaScriptSerializer().Serialize(mRet) & "');", True)
         End If
-        GVqcmRequestAllotment.DataBind()
       Catch ex As Exception
         ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", "alert('" & New JavaScriptSerializer().Serialize(ex.Message) & "');", True)
       End Try
+      GVqcmRequestAllotment.DataBind()
     End If
   End Sub
 
