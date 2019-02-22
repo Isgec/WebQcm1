@@ -236,6 +236,7 @@ Namespace SIS.QCM
         .AllotedOn = Now
         .AllotedBy = Global.System.Web.HttpContext.Current.Session("LoginID")
         .AllotmentRemarks = Record.AllotmentRemarks
+        .RegionID = Record.RegionID
       End With
       _Rec = SIS.QCM.qcmRequestAllotment.UpdateData(_Rec)
       'Refetch to update FK Values

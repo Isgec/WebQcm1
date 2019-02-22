@@ -41,23 +41,35 @@ Namespace SIS.QCM
         End Using
       End Using
       If Ret IsNot Nothing Then
-        SIS.QCM.qcmProjects.InsertData(Ret)
+        SIS.QCM.qcmProjects.InsertData(Ret, mComp)
       End If
       Return Ret
     End Function
-    Public Shared Function InsertData(ByVal Record As SIS.QCM.qcmProjects) As String
+    Public Shared Function InsertData(ByVal Record As SIS.QCM.qcmProjects, Optional ByVal mComp As String = "200") As String
       Dim _Result As String = Record.ProjectID
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+        Dim Sql As String = ""
+        Sql &= " INSERT [IDM_Projects] "
+        Sql &= " ( "
+        Sql &= " [ProjectID] "
+        Sql &= " ,[Description] "
+        Sql &= " ,[ERPCompany] "
+        Sql &= " ,[LogisticCompany] "
+        Sql &= " ,[FinanceCompany] "
+        Sql &= " ) "
+        Sql &= " VALUES "
+        Sql &= " ( "
+        Sql &= "    UPPER('" & Record.ProjectID & "') "
+        Sql &= " ,'" & Record.Description & "' "
+        Sql &= " ,'" & mComp & "' "
+        Sql &= " ,'" & mComp & "' "
+        Sql &= " ,'" & mComp & "' "
+        Sql &= " ) "
         Using Cmd As SqlCommand = Con.CreateCommand()
-          Cmd.CommandType = CommandType.StoredProcedure
-          Cmd.CommandText = "spqcmProjectsInsert"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ProjectID", SqlDbType.NVarChar, 7, Record.ProjectID)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Description", SqlDbType.NVarChar, 51, Record.Description)
-          Cmd.Parameters.Add("@Return_ProjectID", SqlDbType.NVarChar, 6)
-          Cmd.Parameters("@Return_ProjectID").Direction = ParameterDirection.Output
+          Cmd.CommandType = CommandType.Text
+          Cmd.CommandText = Sql
           Con.Open()
           Cmd.ExecuteNonQuery()
-          _Result = Cmd.Parameters("@Return_ProjectID").Value
         End Using
       End Using
       Return _Result
