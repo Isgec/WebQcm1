@@ -104,7 +104,7 @@ Partial Class EF_qcmInspections
 	<System.Web.Services.WebMethod()> _
 	<System.Web.Script.Services.ScriptMethod()> _
   Public Shared Function InspectedByCompletionList(ByVal prefixText As String, ByVal count As Integer, ByVal contextKey As String) As String()
-    Return SIS.QCM.qcmEmployees.SelectqcmEmployeesAutoCompleteList(prefixText, count, contextKey)
+    Return SIS.QCM.qcmUsers.SelectqcmUsersAutoCompleteList(prefixText, count, contextKey)
   End Function
   Protected Sub FVqcmInspections_PreRender(ByVal sender As Object, ByVal ege As System.EventArgs) Handles FVqcmInspections.PreRender
     If Not Editable Then
@@ -218,7 +218,7 @@ Partial Class EF_qcmInspections
     Dim aVal() As String = value.Split(",".ToCharArray)
     Dim mRet As String="0|" & aVal(0)
 		Dim InspectedBy As String = CType(aVal(1),String)
-		Dim oVar As SIS.QCM.qcmEmployees = SIS.QCM.qcmEmployees.qcmEmployeesGetByID(InspectedBy)
+    Dim oVar As SIS.QCM.qcmUsers = SIS.QCM.qcmUsers.qcmUsersGetByID(InspectedBy)
     If oVar Is Nothing Then
 			mRet = "1|" & aVal(0) & "|Record not found." 
     Else

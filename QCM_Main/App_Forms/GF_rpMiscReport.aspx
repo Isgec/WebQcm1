@@ -1,8 +1,8 @@
-<%@ Page Language="VB" MasterPageFile="~/MasterPage.master" AutoEventWireup="false" CodeFile="GF_rpRequestList.aspx.vb" Inherits="GF_rpRequestList" title="Report: Request List" %>
-<asp:Content ID="CPHvrReports" ContentPlaceHolderID="cph1" Runat="Server">
+<%@ Page Language="VB" MasterPageFile="~/MasterPage.master" AutoEventWireup="false" CodeFile="GF_rpMiscReport.aspx.vb" Inherits="GF_rpMiscReport" title="Report: Misc. Reports" %>
+<asp:Content ID="CPHvrReports" ContentPlaceHolderID="cph1" ClientIDMode="Static" Runat="Server">
 <div class="ui-widget-content page">
 <div class="caption">
-    <asp:Label ID="LabelvrReports" runat="server" Text="&nbsp;Print: Request List" Width="100%" CssClass="sis_formheading"></asp:Label>
+    <asp:Label ID="LabelvrReports" runat="server" Text="&nbsp;Print: Misc. Reports" Width="100%" CssClass="sis_formheading"></asp:Label>
 </div>
 <div class="pagedata" style="min-height:350px!important;">
   <LGM:ToolBar0 
@@ -18,12 +18,12 @@
 	DefaultMode = "Insert" CssClass="sis_formview">
 	<InsertItemTemplate>
     <asp:Label ID="L_ErrMsgvrReports" runat="server" ForeColor="Red" Font-Bold="true" Text=""></asp:Label>
-		<table width="100%">
+		<table style="width:100%;">
 			<tr>
-				<td class="alignright">
-					<b><asp:Label ID="L_FReqDt" runat="server" Text="From Request Date :" /></b>
+				<td class="alignright" style="display:none;">
+					<b><asp:Label ID="L_FReqDt" runat="server" Text="From Date :" /></b>
 				</td>
-				<td>
+				<td style="display:none;">
 					<asp:TextBox ID="F_FReqDt"
 						Text='<%# Bind("FReqDt") %>'
             Width="70px"
@@ -63,7 +63,7 @@
 						SetFocusOnError="true" />
 				</td>
 				<td class="alignright">
-					<b><asp:Label ID="L_TReqDt" runat="server" Text="To Request Date :" /></b>
+					<b><asp:Label ID="L_TReqDt" runat="server" Text="Report For Date :" /></b>
 				</td>
 				<td>
 					<asp:TextBox ID="F_TReqDt"
@@ -161,9 +161,16 @@
 						Runat="Server" />
         </td>
 			</tr>
-			<tr>
-				<td colspan="4" style="text-align:center">
-					<asp:Button runat="server" ID="cmdGenerate" Text="  PRINT  " BackColor="Aqua" CausesValidation="true" ValidationGroup="vrReports" CommandName="Insert" />
+      <tr style="border:1pt solid silver;">
+        <td colspan="4" style="text-align:center;">
+          <h2>Reports</h2>
+        </td>
+      </tr>
+      <tr style="border:1pt solid silver;">
+				<td colspan="4" style="padding-left:40px;padding:20px;text-align:center;">
+					<asp:Button runat="server" ID="cmdDelay" Text="1. Inspection Load" CausesValidation="true" ValidationGroup="vrReports" CommandName="Delay" style="width:150px;margin-top:20px;" />
+          <br />
+					<asp:Button runat="server" ID="cmdLoad" Text="2. Inspection Attended" CausesValidation="true" ValidationGroup="vrReports" CommandName="Load" style="width:150px;margin-top:20px;" />
 				</td>
 			</tr>
 		</table>

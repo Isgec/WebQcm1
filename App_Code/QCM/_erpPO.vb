@@ -52,7 +52,8 @@ Namespace SIS.ERP
       If Results IsNot Nothing Then
         If Results.BuyerID.Length < 4 Then Results.BuyerID = Results.BuyerID.PadLeft(4, "0")
         Dim tmpSupplierID As String = Results.SupplierID
-        If mComp <> "200" Then Results.SupplierID = "S" & mComp & Right(Results.SupplierID, 5)
+        'If mComp <> "200" Then Results.SupplierID = "S" & mComp & Right(Results.SupplierID, 5)
+        If mComp <> "200" Then Results.SupplierID = "" & mComp & Right(Results.SupplierID, 6)
         Dim oVar As SIS.QCM.qcmVendors = SIS.QCM.qcmVendors.qcmVendorsGetByID(Results.SupplierID)
         If oVar Is Nothing Then oVar = SIS.QCM.qcmVendors.GetBPFromERP(tmpSupplierID, mComp)
         Results.SupplierAddress = oVar.Address1.Trim & " " & oVar.Address2 & " " & oVar.Address3 & " " & oVar.Address4

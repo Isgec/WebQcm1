@@ -57,8 +57,8 @@ Namespace SIS.QCM
     Private _QCM_InspectionStatus11_Description As String = ""
     Private _QCM_Regions12_RegionName As String = ""
     Private _FK_QCM_Requests_Createdby As SIS.QCM.qcmEmployees = Nothing
-    Private _FK_QCM_Requests_AllotedTo As SIS.QCM.qcmEmployees = Nothing
-    Private _FK_QCM_Requests_AllotedBy As SIS.QCM.qcmEmployees = Nothing
+    Private _FK_QCM_Requests_AllotedTo As SIS.QCM.qcmUsers = Nothing
+    Private _FK_QCM_Requests_AllotedBy As SIS.QCM.qcmUsers = Nothing
     Private _FK_QCM_Requests_CancelledBy As SIS.QCM.qcmEmployees = Nothing
     Private _FK_QCM_Requests_ReceivedBy As SIS.QCM.qcmEmployees = Nothing
     Private _FK_QCM_Requests_ProjectID As SIS.QCM.qcmProjects = Nothing
@@ -665,18 +665,18 @@ Namespace SIS.QCM
         Return _FK_QCM_Requests_Createdby
       End Get
     End Property
-    Public ReadOnly Property FK_QCM_Requests_AllotedTo() As SIS.QCM.qcmEmployees
+    Public ReadOnly Property FK_QCM_Requests_AllotedTo() As SIS.QCM.qcmUsers
       Get
         If _FK_QCM_Requests_AllotedTo Is Nothing Then
-          _FK_QCM_Requests_AllotedTo = SIS.QCM.qcmEmployees.qcmEmployeesGetByID(_AllotedTo)
+          _FK_QCM_Requests_AllotedTo = SIS.QCM.qcmUsers.qcmUsersGetByID(_AllotedTo)
         End If
         Return _FK_QCM_Requests_AllotedTo
       End Get
     End Property
-    Public ReadOnly Property FK_QCM_Requests_AllotedBy() As SIS.QCM.qcmEmployees
+    Public ReadOnly Property FK_QCM_Requests_AllotedBy() As SIS.QCM.qcmUsers
       Get
         If _FK_QCM_Requests_AllotedBy Is Nothing Then
-          _FK_QCM_Requests_AllotedBy = SIS.QCM.qcmEmployees.qcmEmployeesGetByID(_AllotedBy)
+          _FK_QCM_Requests_AllotedBy = SIS.QCM.qcmUsers.qcmUsersGetByID(_AllotedBy)
         End If
         Return _FK_QCM_Requests_AllotedBy
       End Get
@@ -1246,138 +1246,6 @@ Namespace SIS.QCM
       Catch ex As Exception
       End Try
     End Sub
-    'Public Sub New(ByVal Reader As SqlDataReader)
-    '  On Error Resume Next
-    '  _RequestID = Ctype(Reader("RequestID"),Int32)
-    '  _ProjectID = Ctype(Reader("ProjectID"),String)
-    '  If Convert.IsDBNull(Reader("OrderNo")) Then
-    '    _OrderNo = String.Empty
-    '  Else
-    '    _OrderNo = Ctype(Reader("OrderNo"), String)
-    '  End If
-    '  If Convert.IsDBNull(Reader("OrderDate")) Then
-    '    _OrderDate = String.Empty
-    '  Else
-    '    _OrderDate = Ctype(Reader("OrderDate"), String)
-    '  End If
-    '  _SupplierID = Ctype(Reader("SupplierID"),String)
-    '  _Description = Ctype(Reader("Description"),String)
-    '  If Convert.IsDBNull(Reader("TotalRequestedQuantity")) Then
-    '    _TotalRequestedQuantity = String.Empty
-    '  Else
-    '    _TotalRequestedQuantity = Ctype(Reader("TotalRequestedQuantity"), String)
-    '  End If
-    '  _RequestedInspectionStartDate = Ctype(Reader("RequestedInspectionStartDate"),DateTime)
-    '  _RequestedInspectionFinishDate = Ctype(Reader("RequestedInspectionFinishDate"),DateTime)
-    '  _ClientInspectionRequired = Ctype(Reader("ClientInspectionRequired"),Boolean)
-    '  _ThirdPartyInspectionRequired = Ctype(Reader("ThirdPartyInspectionRequired"),Boolean)
-    '  If Convert.IsDBNull(Reader("ReceivedOn")) Then
-    '    _ReceivedOn = String.Empty
-    '  Else
-    '    _ReceivedOn = Ctype(Reader("ReceivedOn"), String)
-    '  End If
-    '  If Convert.IsDBNull(Reader("ReceivedBy")) Then
-    '    _ReceivedBy = String.Empty
-    '  Else
-    '    _ReceivedBy = Ctype(Reader("ReceivedBy"), String)
-    '  End If
-    '  If Convert.IsDBNull(Reader("ReceivingMediumID")) Then
-    '    _ReceivingMediumID = String.Empty
-    '  Else
-    '    _ReceivingMediumID = Ctype(Reader("ReceivingMediumID"), String)
-    '  End If
-    '  If Convert.IsDBNull(Reader("CreationRemarks")) Then
-    '    _CreationRemarks = String.Empty
-    '  Else
-    '    _CreationRemarks = Ctype(Reader("CreationRemarks"), String)
-    '  End If
-    '  _CreatedBy = Ctype(Reader("CreatedBy"),String)
-    '  _CreatedOn = Ctype(Reader("CreatedOn"),DateTime)
-    '  _RequestStateID = Ctype(Reader("RequestStateID"),String)
-    '  _FileAttached = Ctype(Reader("FileAttached"),Boolean)
-    '  If Convert.IsDBNull(Reader("InspectionStageiD")) Then
-    '    _InspectionStageiD = String.Empty
-    '  Else
-    '    _InspectionStageiD = Ctype(Reader("InspectionStageiD"), String)
-    '  End If
-    '  If Convert.IsDBNull(Reader("AllotedTo")) Then
-    '    _AllotedTo = String.Empty
-    '  Else
-    '    _AllotedTo = Ctype(Reader("AllotedTo"), String)
-    '  End If
-    '  If Convert.IsDBNull(Reader("AllotedStartDate")) Then
-    '    _AllotedStartDate = String.Empty
-    '  Else
-    '    _AllotedStartDate = Ctype(Reader("AllotedStartDate"), String)
-    '  End If
-    '  If Convert.IsDBNull(Reader("AllotedFinishDate")) Then
-    '    _AllotedFinishDate = String.Empty
-    '  Else
-    '    _AllotedFinishDate = Ctype(Reader("AllotedFinishDate"), String)
-    '  End If
-    '  If Convert.IsDBNull(Reader("AllotedOn")) Then
-    '    _AllotedOn = String.Empty
-    '  Else
-    '    _AllotedOn = Ctype(Reader("AllotedOn"), String)
-    '  End If
-    '  If Convert.IsDBNull(Reader("AllotedBy")) Then
-    '    _AllotedBy = String.Empty
-    '  Else
-    '    _AllotedBy = Ctype(Reader("AllotedBy"), String)
-    '  End If
-    '  If Convert.IsDBNull(Reader("AllotmentRemarks")) Then
-    '    _AllotmentRemarks = String.Empty
-    '  Else
-    '    _AllotmentRemarks = Ctype(Reader("AllotmentRemarks"), String)
-    '  End If
-    '  If Convert.IsDBNull(Reader("InspectionStartDate")) Then
-    '    _InspectionStartDate = String.Empty
-    '  Else
-    '    _InspectionStartDate = Ctype(Reader("InspectionStartDate"), String)
-    '  End If
-    '  If Convert.IsDBNull(Reader("InspectionFinishDate")) Then
-    '    _InspectionFinishDate = String.Empty
-    '  Else
-    '    _InspectionFinishDate = Ctype(Reader("InspectionFinishDate"), String)
-    '  End If
-    '  If Convert.IsDBNull(Reader("InspectionStatusID")) Then
-    '    _InspectionStatusID = String.Empty
-    '  Else
-    '    _InspectionStatusID = Ctype(Reader("InspectionStatusID"), String)
-    '  End If
-    '  If Convert.IsDBNull(Reader("CancelledOn")) Then
-    '    _CancelledOn = String.Empty
-    '  Else
-    '    _CancelledOn = Ctype(Reader("CancelledOn"), String)
-    '  End If
-    '  If Convert.IsDBNull(Reader("CancelledBy")) Then
-    '    _CancelledBy = String.Empty
-    '  Else
-    '    _CancelledBy = Ctype(Reader("CancelledBy"), String)
-    '  End If
-    '  If Convert.IsDBNull(Reader("CancellationRemarks")) Then
-    '    _CancellationRemarks = String.Empty
-    '  Else
-    '    _CancellationRemarks = Ctype(Reader("CancellationRemarks"), String)
-    '  End If
-    '  If Convert.IsDBNull(Reader("RegionID")) Then
-    '    _RegionID = String.Empty
-    '  Else
-    '    _RegionID = Ctype(Reader("RegionID"), String)
-    '  End If
-    '  _HRM_Employees1_EmployeeName = Ctype(Reader("HRM_Employees1_EmployeeName"),String)
-    '  _HRM_Employees2_EmployeeName = Ctype(Reader("HRM_Employees2_EmployeeName"),String)
-    '  _HRM_Employees3_EmployeeName = Ctype(Reader("HRM_Employees3_EmployeeName"),String)
-    '  _HRM_Employees4_EmployeeName = Ctype(Reader("HRM_Employees4_EmployeeName"),String)
-    '  _HRM_Employees5_EmployeeName = Ctype(Reader("HRM_Employees5_EmployeeName"),String)
-    '  _IDM_Projects6_Description = Ctype(Reader("IDM_Projects6_Description"),String)
-    '  _IDM_Vendors7_Description = Ctype(Reader("IDM_Vendors7_Description"),String)
-    '  _QCM_InspectionStages8_Description = Ctype(Reader("QCM_InspectionStages8_Description"),String)
-    '  _QCM_ReceivingMediums9_Description = Ctype(Reader("QCM_ReceivingMediums9_Description"),String)
-    '  _QCM_RequestStates10_Description = Ctype(Reader("QCM_RequestStates10_Description"),String)
-    '  _QCM_InspectionStatus11_Description = Ctype(Reader("QCM_InspectionStatus11_Description"),String)
-    '  _QCM_Regions12_RegionName = Ctype(Reader("QCM_Regions12_RegionName"),String)
-    'End Sub
     Public Sub New()
     End Sub
   End Class

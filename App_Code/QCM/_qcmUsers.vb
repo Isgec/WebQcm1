@@ -29,6 +29,14 @@ Namespace SIS.QCM
     Private _FK_USR_Designation As SIS.QCM.qcmDesignations = Nothing
     Private _FK_USR_Division As SIS.QCM.qcmDivisions = Nothing
     Private _FK_USR_OfficeID As SIS.QCM.qcmOffices = Nothing
+    Public Property LoginID As String
+      Get
+        Return _UserName
+      End Get
+      Set(value As String)
+        _UserName = value
+      End Set
+    End Property
     Public ReadOnly Property ForeColor() As System.Drawing.Color
       Get
         Dim mRet As System.Drawing.Color = Drawing.Color.Blue

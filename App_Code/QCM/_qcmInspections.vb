@@ -37,13 +37,13 @@ Namespace SIS.QCM
     Private _QCM_RequestStates6_Description As String = ""
     Private _HRM_Employees7_EmployeeName As String = ""
     Private _QCM_Requests8_Description As String = ""
-    Private _FK_QCM_Inspections_InspectedBy As SIS.QCM.qcmEmployees = Nothing
+    Private _FK_QCM_Inspections_InspectedBy As SIS.QCM.qcmUsers = Nothing
     Private _FK_QCM_Inspections_ProjectID As SIS.QCM.qcmProjects = Nothing
     Private _FK_QCM_Inspections_SupplierID As SIS.QCM.qcmVendors = Nothing
     Private _FK_QCM_Inspections_InspectionStageID As SIS.QCM.qcmInspectionStages = Nothing
     Private _FK_QCM_Inspections_InspectionStateID As SIS.QCM.qcmInspectionStatus = Nothing
     Private _FK_QCM_Inspections_RequestStateID As SIS.QCM.qcmRequestStates = Nothing
-    Private _FK_QCM_Inspections_EnteredBy As SIS.QCM.qcmEmployees = Nothing
+    Private _FK_QCM_Inspections_EnteredBy As SIS.QCM.qcmUsers = Nothing
     Private _FK_QCM_Inspections_RequestID As SIS.QCM.qcmRequests = Nothing
     Public Property InspectedQuantityFinal() As String
       Get
@@ -427,10 +427,10 @@ Namespace SIS.QCM
 				End Set
 			End Property
     End Class
-    Public ReadOnly Property FK_QCM_Inspections_InspectedBy() As SIS.QCM.qcmEmployees
+    Public ReadOnly Property FK_QCM_Inspections_InspectedBy() As SIS.QCM.qcmUsers
       Get
         If _FK_QCM_Inspections_InspectedBy Is Nothing Then
-          _FK_QCM_Inspections_InspectedBy = SIS.QCM.qcmEmployees.qcmEmployeesGetByID(_InspectedBy)
+          _FK_QCM_Inspections_InspectedBy = SIS.QCM.qcmUsers.qcmUsersGetByID(_InspectedBy)
         End If
         Return _FK_QCM_Inspections_InspectedBy
       End Get
@@ -475,10 +475,10 @@ Namespace SIS.QCM
         Return _FK_QCM_Inspections_RequestStateID
       End Get
     End Property
-    Public ReadOnly Property FK_QCM_Inspections_EnteredBy() As SIS.QCM.qcmEmployees
+    Public ReadOnly Property FK_QCM_Inspections_EnteredBy() As SIS.QCM.qcmUsers
       Get
         If _FK_QCM_Inspections_EnteredBy Is Nothing Then
-          _FK_QCM_Inspections_EnteredBy = SIS.QCM.qcmEmployees.qcmEmployeesGetByID(_EnteredBy)
+          _FK_QCM_Inspections_EnteredBy = SIS.QCM.qcmUsers.qcmUsersGetByID(_EnteredBy)
         End If
         Return _FK_QCM_Inspections_EnteredBy
       End Get

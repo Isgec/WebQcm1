@@ -24,7 +24,7 @@ Partial Class AF_qcmInspections
   <System.Web.Services.WebMethod()>
   <System.Web.Script.Services.ScriptMethod()>
   Public Shared Function InspectedByCompletionList(ByVal prefixText As String, ByVal count As Integer, ByVal contextKey As String) As String()
-    Return SIS.QCM.qcmEmployees.SelectqcmEmployeesAutoCompleteList(prefixText, count, contextKey)
+    Return SIS.QCM.qcmUsers.SelectqcmUsersAutoCompleteList(prefixText, count, contextKey)
   End Function
   Protected Sub FVqcmInspections_PreRender(ByVal sender As Object, ByVal eex As System.EventArgs) Handles FVqcmInspections.PreRender
     Dim oReq As SIS.QCM.qcmRequests = SIS.QCM.qcmRequests.qcmRequestsGetByID(Request.QueryString("RequestID"))
@@ -127,7 +127,7 @@ Partial Class AF_qcmInspections
     Dim oF_InspectedBy_Display As Label = FVqcmInspections.FindControl("F_InspectedBy_Display")
     Dim oF_InspectedBy As TextBox = FVqcmInspections.FindControl("F_InspectedBy")
     oF_InspectedBy.Text = oReq.AllotedTo
-    oF_InspectedBy_Display.Text = oReq.FK_QCM_Requests_AllotedTo.EmployeeName
+    oF_InspectedBy_Display.Text = oReq.FK_QCM_Requests_AllotedTo.UserFullName
     mStr = mStr & vbCrLf & "ACEInspectedBy_Selected: function(o, e) {"
     mStr = mStr & vbCrLf & "  var F_InspectedBy = $get('" & oF_InspectedBy.ClientID & "');"
     mStr = mStr & vbCrLf & "  var F_InspectedBy_Display = $get('" & oF_InspectedBy_Display.ClientID & "');"
@@ -230,7 +230,7 @@ Partial Class AF_qcmInspections
     Dim aVal() As String = value.Split(",".ToCharArray)
     Dim mRet As String = "0|" & aVal(0)
     Dim InspectedBy As String = CType(aVal(1), String)
-    Dim oVar As SIS.QCM.qcmEmployees = SIS.QCM.qcmEmployees.qcmEmployeesGetByID(InspectedBy)
+    Dim oVar As SIS.QCM.qcmUsers = SIS.QCM.qcmUsers.qcmUsersGetByID(InspectedBy)
     If oVar Is Nothing Then
       mRet = "1|" & aVal(0) & "|Record not found."
     Else

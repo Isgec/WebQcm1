@@ -119,7 +119,7 @@ Partial Class EF_qcmRequestAllotment
     Dim aVal() As String = value.Split(",".ToCharArray)
     Dim mRet As String="0|" & aVal(0)
 		Dim AllotedTo As String = CType(aVal(1),String)
-		Dim oVar As SIS.QCM.qcmEmployees = SIS.QCM.qcmEmployees.qcmAllotedToGetByID(AllotedTo)
+    Dim oVar As SIS.QCM.qcmUsers = SIS.QCM.qcmEmployees.qcmAllotedToGetByID(AllotedTo)
     If oVar Is Nothing Then
 			mRet = "1|" & aVal(0) & "|Record not found." 
     Else

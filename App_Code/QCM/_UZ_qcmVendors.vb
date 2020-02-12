@@ -51,7 +51,8 @@ Namespace SIS.QCM
         End Using
       End Using
       If Results IsNot Nothing Then
-        If mComp <> "200" Then Results.VendorID = "S" & mComp & Right(Results.VendorID, 5)
+        'If mComp <> "200" Then Results.VendorID = "S" & mComp & Right(Results.VendorID, 5)
+        If mComp <> "200" Then Results.VendorID = "" & mComp & Right(Results.VendorID, 6)
         Results = SIS.QCM.qcmVendors.InsertData(Results)
       End If
       Return Results

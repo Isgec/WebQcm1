@@ -10,7 +10,7 @@ Partial Class AF_qcmInspectorGroupUsers
 	<System.Web.Services.WebMethod()> _
 	<System.Web.Script.Services.ScriptMethod()> _
   Public Shared Function CardNoCompletionList(ByVal prefixText As String, ByVal count As Integer, ByVal contextKey As String) As String()
-    Return SIS.QCM.qcmEmployees.SelectqcmEmployeesAutoCompleteList(prefixText, count, contextKey)
+    Return SIS.QCM.qcmUsers.SelectqcmUsersAutoCompleteList(prefixText, count, contextKey)
   End Function
   Protected Sub FVqcmInspectorGroupUsers_PreRender(ByVal sender As Object, ByVal e As System.EventArgs) Handles FVqcmInspectorGroupUsers.PreRender
 		Dim mStr As String = "<script type=""text/javascript""> "
@@ -92,7 +92,7 @@ Partial Class AF_qcmInspectorGroupUsers
     Dim aVal() As String = value.Split(",".ToCharArray)
     Dim mRet As String="0|" & aVal(0)
 		Dim CardNo As String = CType(aVal(1),String)
-		Dim oVar As SIS.QCM.qcmEmployees = SIS.QCM.qcmEmployees.qcmEmployeesGetByID(CardNo)
+    Dim oVar As SIS.QCM.qcmUsers = SIS.QCM.qcmUsers.qcmUsersGetByID(CardNo)
     If oVar Is Nothing Then
 			mRet = "1|" & aVal(0) & "|Record not found." 
     Else

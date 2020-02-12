@@ -250,7 +250,7 @@ Namespace SIS.QCM
         If _Rec.DocumentID <> String.Empty Then
           Try
             _Rec.AllotedTo = _Rec.DocumentID
-            _Rec.HRM_Employees2_EmployeeName = _Rec.FK_QCM_Requests_AllotedTo.EmployeeName
+            _Rec.HRM_Employees2_EmployeeName = _Rec.FK_QCM_Requests_AllotedTo.UserFullName
             SendCancellationEMail(_Rec)
           Catch ex As Exception
           End Try
@@ -729,12 +729,34 @@ Namespace SIS.QCM
       End If
       Return mRet
     End Function
+    Public Shared Function GetLastInspection(RequestID As Integer) As SIS.QCM.qcmInspections
+      Dim mRet As SIS.QCM.qcmInspections = Nothing
+      Dim InspectionID As String = ""
+      Dim Sql As String = ""
+      Sql &= " SELECT isnull(MAX(InspectionID),'') AS Expr1 "
+      Sql &= " FROM QCM_Inspections "
+      Sql &= " WHERE (RequestID = " & RequestID & ") AND InspectionStatusid=7 AND (InspectionID < "
+      Sql &= "       (SELECT MAX(InspectionID) AS Expr1 "
+      Sql &= "        FROM QCM_Inspections AS QCM_Inspections_1 "
+      Sql &= "        WHERE        (RequestID = " & RequestID & "))) "
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.Text
+          Cmd.CommandText = Sql
+          Con.Open()
+          InspectionID = Cmd.ExecuteScalar
+        End Using
+      End Using
+      mRet = SIS.QCM.qcmInspections.qcmInspectionsGetByID(RequestID, InspectionID)
+      Return mRet
+    End Function
     Public Shared Function SendClosedEMail(ByVal RecordID As Integer) As String
       Dim mMailID As String = SIS.SYS.Utilities.ApplicationSpacific.NextMailNo
       Dim mRet As String = ""
       Dim ToEMailID As String = ""
       Dim FromEMailID As String = ""
       Dim Record As SIS.QCM.qcmRequestAllotment = SIS.QCM.qcmRequestAllotment.qcmRequestAllotmentGetByID(RecordID)
+      Dim Inspection As SIS.QCM.qcmInspections = GetLastInspection(RecordID)
       ToEMailID = Record.FK_QCM_Requests_Createdby.EMailID
       FromEMailID = Record.FK_QCM_Requests_AllotedTo.EMailID
       If ToEMailID <> String.Empty And FromEMailID <> String.Empty Then
@@ -755,12 +777,12 @@ Namespace SIS.QCM
             Catch ex As Exception
             End Try
             .IsBodyHtml = True
-            .Subject = "Inspection Request " & Record.RequestID & " Completed at Vendor: " & Record.IDM_Vendors7_Description
+            .Subject = "Inspection Request " & Record.RequestID & " Closed for Vendor: " & Record.IDM_Vendors7_Description
 
             Dim sb As New StringBuilder
             With sb
               .AppendLine("<table style=""width:900px"" border=""1"" cellspacing=""1"" cellpadding=""1"">")
-              .AppendLine("<tr><td style=""color:green"" colspan=""2"" align=""center""><h3><b>INSPECTION CALL COMPLETED : " & Record.RequestID & "</b></h3></td></tr>")
+              .AppendLine("<tr><td style=""color:green"" colspan=""2"" align=""center""><h3><b>INSPECTION CALL CLOSED : " & Record.RequestID & "</b></h3></td></tr>")
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Alloted To</b></td>")
               .AppendLine("<td>" & Record.HRM_Employees2_EmployeeName & "</td></tr>")
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Project</b></td>")
@@ -804,6 +826,12 @@ Namespace SIS.QCM
                 .AppendLine("<td>" & Record.InspectionStartDate & "</td></tr>")
                 .AppendLine("<tr><td bgcolor=""lightgray""><b>Closed On</b></td>")
                 .AppendLine("<td>" & Record.InspectionFinishDate & "</td></tr>")
+              End If
+              If Inspection IsNot Nothing Then
+                .AppendLine("<tr><td bgcolor=""lightgray""><b>Inspector Remarks</b></td>")
+                .AppendLine("<td>" & Inspection.InspectionRemarks & "</td></tr>")
+                .AppendLine("<tr><td bgcolor=""lightgray""><b>Inspection Status</b></td>")
+                .AppendLine("<td>" & Inspection.QCM_InspectionStatus5_Description & "</td></tr>")
               End If
               .AppendLine("</table>")
             End With
@@ -980,7 +1008,7 @@ Namespace SIS.QCM
               .AppendLine("<table style=""width:900px"" border=""1"" cellspacing=""1"" cellpadding=""1"">")
               .AppendLine("<tr><td colspan=""2"" align=""center""><h3><b>INSPECTION CALL REQUEST ID: " & Record.RequestID & "</b></h3></td></tr>")
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Alloted To</b></td>")
-              .AppendLine("<td>" & Record.FK_QCM_Requests_AllotedTo.EmployeeName & "</td></tr>")
+              .AppendLine("<td>" & Record.FK_QCM_Requests_AllotedTo.UserFullName & "</td></tr>")
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Project</b></td>")
               .AppendLine("<td>" & Record.IDM_Projects6_Description & " [" & Record.ProjectID & "]" & "</td></tr>")
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Purchase Order</b></td>")
@@ -1122,7 +1150,7 @@ Namespace SIS.QCM
               .AppendLine("<table style=""width:900px"" border=""1"" cellspacing=""1"" cellpadding=""1"">")
               .AppendLine("<tr><td colspan=""2"" align=""center""><h3><b>INSPECTION CALL REQUEST ID: " & Record.RequestID & "</b></h3></td></tr>")
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Alloted To</b></td>")
-              .AppendLine("<td>" & Record.FK_QCM_Requests_AllotedTo.EmployeeName & "</td></tr>")
+              .AppendLine("<td>" & Record.FK_QCM_Requests_AllotedTo.UserFullName & "</td></tr>")
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Project</b></td>")
               .AppendLine("<td>" & Record.IDM_Projects6_Description & " [" & Record.ProjectID & "]" & "</td></tr>")
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Purchase Order</b></td>")
@@ -1356,14 +1384,14 @@ Namespace SIS.QCM
     Public Shared Function GetSMSData(ByVal RequestID As Integer) As String
       Dim Record As SIS.QCM.qcmRequestAllotment = SIS.QCM.qcmRequestAllotment.qcmRequestAllotmentGetByID(RequestID)
       Dim mRet As String = ""
-      mRet = Record.FK_QCM_Requests_AllotedTo.EmployeeName
+      mRet = Record.FK_QCM_Requests_AllotedTo.UserFullName
       mRet = mRet & ", You are requested to attend the inspection call. Project: " & Record.IDM_Projects6_Description
       mRet = mRet & " Supplier: " & Record.IDM_Vendors7_Description
       mRet = mRet & " Place: " & Record.CreationRemarks
       mRet = mRet & " QTY.: " & Record.TotalRequestedQuantity
       mRet = mRet & IIf(Record.AllotedStartDate = Record.AllotedFinishDate, " On Date: " & Record.AllotedStartDate, "From Dt.: " & Record.AllotedStartDate & " To: " & Record.AllotedFinishDate)
       mRet = mRet & " Details: " & Record.Description
-      mRet = "http://192.9.200.172:8080/xampp/web2sms.php?toaddress=" & "|" & Record.FK_QCM_Requests_AllotedTo.ContactNumbers & "|" & SIS.QCM.qcmEmployees.qcmEmployeesGetByID(Record.CreatedBy).ContactNumbers & "|" & mRet
+      mRet = "http://192.9.200.172:8080/xampp/web2sms.php?toaddress=" & "|" & Record.FK_QCM_Requests_AllotedTo.MobileNo & "|" & SIS.QCM.qcmEmployees.qcmEmployeesGetByID(Record.CreatedBy).ContactNumbers & "|" & mRet
       Return mRet
     End Function
   End Class
