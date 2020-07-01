@@ -341,7 +341,7 @@ Partial Class AF_qcmRequests
     Dim ProjectID As String = CType(aVal(1), String)
     Dim oVar As SIS.QCM.qcmProjects = SIS.QCM.qcmProjects.qcmProjectsGetByID(ProjectID)
     If oVar Is Nothing Then
-      oVar = SIS.QCM.qcmProjects.GetProjectFromERP(ProjectID)
+      oVar = SIS.QCM.qcmProjects.GetProjectFromERP(ProjectID, "")
       If oVar Is Nothing Then
         mRet = "1|" & aVal(0) & "|Record not found IN ERP."
       Else
@@ -360,7 +360,7 @@ Partial Class AF_qcmRequests
     Dim oVar As SIS.QCM.qcmVendors = SIS.QCM.qcmVendors.qcmVendorsGetByID(SupplierID)
     Dim PlaceToVisit As String = ""
     If oVar Is Nothing Then
-      SIS.QCM.qcmVendors.GetBPFromERP(SupplierID)
+      SIS.QCM.qcmVendors.GetBPFromERP(SupplierID, "")
       oVar = SIS.QCM.qcmVendors.qcmVendorsGetByID(SupplierID)
       If oVar Is Nothing Then
         mRet = "1|" & aVal(0) & "|Record not found." & "|" & PlaceToVisit

@@ -54,20 +54,13 @@ Namespace SIS.SYS.Utilities
       With HttpContext.Current
         .Session("ApplicationID") = 19
         .Session("ApplicationDefaultPage") = "~/Default.aspx"
+        .Session("FinanceCompany") = "200"
       End With
     End Sub
     Public Shared Sub ApplicationReports(ByVal Context As HttpContext)
       If Not Context.Request.QueryString("ReportName") Is Nothing Then
         Select Case (Context.Request.QueryString("ReportName").ToLower)
           Case "customertransmittal"
-            'Dim oRep As RPT_idmCT = New RPT_idmCT(Context)
-            'oRep.GenerateReport()
-            '	Case "pendingdocument"
-            '		Dim oRep As RPT_dcmPendingDocument = New RPT_dcmPendingDocument(Context)
-            '		oRep.GenerateReport()
-            '	Case "sentdocument"
-            '		Dim oRep As RPT_dcmSentDocument = New RPT_dcmSentDocument(Context)
-            '		oRep.GenerateReport()
         End Select
       End If
     End Sub

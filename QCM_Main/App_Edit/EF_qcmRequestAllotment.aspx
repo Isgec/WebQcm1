@@ -293,11 +293,54 @@
 									<asp:Label ID="L_AllotedTo" runat="server" Text="Alloted To :" /></b>
 							</td>
 							<td>
-								<asp:TextBox ID="F_AllotedTo" CssClass="myfktxt" Text='<%# Bind("AllotedTo") %>' AutoCompleteType="None" Width="56px" onfocus="return this.select();" ToolTip="Enter value for Alloted To." ValidationGroup="qcmRequestAllotment" onblur="script_qcmRequestAllotment.validate_AllotedTo(this);" runat="Server" />
-								<asp:Button ID="cmdSchedule" runat="server" Text="Get Schedule" OnClick="cmdSchedule_Click" />
-								<asp:Label ID="F_AllotedTo_Display" Text='<%# Eval("HRM_Employees2_EmployeeName") %>' runat="Server" />
-								<asp:RequiredFieldValidator ID="RFVAllotedTo" ForeColor="Red" runat="server" ControlToValidate="F_AllotedTo" Text="Alloted To is required." ErrorMessage="[Required!]" Display="Dynamic" EnableClientScript="true" ValidationGroup="qcmRequestAllotment" SetFocusOnError="true" />
-								<AJX:AutoCompleteExtender ID="ACEAllotedTo" BehaviorID="B_ACEAllotedTo" ContextKey="" UseContextKey="true" ServiceMethod="AllotedToCompletionList" TargetControlID="F_AllotedTo" EnableCaching="false" CompletionInterval="100" FirstRowSelected="true" MinimumPrefixLength="1" OnClientItemSelected="script_qcmRequestAllotment.ACEAllotedTo_Selected" OnClientPopulating="script_qcmRequestAllotment.ACEAllotedTo_Populating" OnClientPopulated="script_qcmRequestAllotment.ACEAllotedTo_Populated" CompletionSetCount="10" CompletionListCssClass="autocomplete_completionListElement" CompletionListItemCssClass="autocomplete_listItem" CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" runat="Server" />
+								<asp:TextBox 
+                  ID="F_AllotedTo" 
+                  CssClass="myfktxt" 
+                  Text='<%# Bind("AllotedTo") %>' 
+                  AutoCompleteType="None" 
+                  Width="56px" 
+                  onfocus="return this.select();" 
+                  ToolTip="Enter value for Alloted To." 
+                  ValidationGroup="qcmRequestAllotment" 
+                  onblur="script_qcmRequestAllotment.validate_AllotedTo(this);" 
+                  runat="Server" />
+								<asp:Button ID="cmdSchedule" 
+                  runat="server" 
+                  Text="Get Schedule" 
+                  OnClick="cmdSchedule_Click" />
+								<asp:Label ID="F_AllotedTo_Display" 
+                  Text='<%# Eval("HRM_Employees2_EmployeeName") %>' 
+                  runat="Server" />
+								<asp:RequiredFieldValidator 
+                  ID="RFVAllotedTo" 
+                  ForeColor="Red" 
+                  runat="server" 
+                  ControlToValidate="F_AllotedTo" 
+                  Text="Alloted To is required." 
+                  ErrorMessage="[Required!]" 
+                  Display="Dynamic" 
+                  EnableClientScript="true" 
+                  ValidationGroup="qcmRequestAllotment" 
+                  SetFocusOnError="true" />
+								<AJX:AutoCompleteExtender 
+                  ID="ACEAllotedTo" 
+                  BehaviorID="B_ACEAllotedTo" 
+                  ContextKey="" 
+                  UseContextKey="true" 
+                  ServiceMethod="AllotedToCompletionList" 
+                  TargetControlID="F_AllotedTo" 
+                  EnableCaching="false" 
+                  CompletionInterval="100" 
+                  FirstRowSelected="true" 
+                  MinimumPrefixLength="1" 
+                  OnClientItemSelected="script_qcmRequestAllotment.ACEAllotedTo_Selected" 
+                  OnClientPopulating="script_qcmRequestAllotment.ACEAllotedTo_Populating" 
+                  OnClientPopulated="script_qcmRequestAllotment.ACEAllotedTo_Populated" 
+                  CompletionSetCount="10" 
+                  CompletionListCssClass="autocomplete_completionListElement" 
+                  CompletionListItemCssClass="autocomplete_listItem" 
+                  CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem" 
+                  runat="Server" />
 							</td>
 						</tr>
 						<tr>

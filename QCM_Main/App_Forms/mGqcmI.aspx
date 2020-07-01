@@ -22,7 +22,7 @@
                 <asp:Button ID="cmdSearch" runat="server" CssClass="btn btn-dark" Text="Search" />
               </div>
             </div>
-            <asp:GridView ID="GVqcmRequestAllotment" Width="100%" runat="server" DataSourceID="ODSqcmRequestAllotment" DataKeyNames="RequestID" AutoGenerateColumns="False">
+            <asp:GridView ID="GVqcmRequestAllotment" Width="100%" runat="server" DataSourceID="ODSqcmRequestAllotment" DataKeyNames="RequestID,Company" AutoGenerateColumns="False">
               <Columns>
                 <asp:TemplateField HeaderText="Request">
                   <ItemTemplate>
@@ -31,22 +31,62 @@
                 </asp:TemplateField>
                 <asp:TemplateField HeaderText="START">
                   <ItemTemplate>
-                    <asp:LinkButton ID="cmdStart" CommandName="cmdStart" CommandArgument='<%# Container.DataItemIndex %>' runat="server" Visible='<%# EVal("StartVisible") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Start Call" OnClientClick='<%# "return confirm(""Do you want to Start Call ?"");" %>'><div class="btn btn-sm btn-success">START</div></asp:LinkButton>
+                    <asp:LinkButton 
+                      ID="cmdStart" 
+                      CommandName="cmdStart" 
+                      CommandArgument='<%# Container.DataItemIndex %>' 
+                      runat="server" 
+                      Visible='<%# EVal("StartVisible") %>' 
+                      AlternateText='<%# EVal("PrimaryKey") %>' 
+                      ToolTip="Start Call" 
+                      OnClientClick='<%# "return confirm(""Do you want to Start Call ?"");" %>'>
+                      <div class="btn btn-sm btn-success">START</div>
+                    </asp:LinkButton>
                   </ItemTemplate>
                   <ItemStyle CssClass="alignCenter" />
                   <HeaderStyle CssClass="alignCenter" />
                 </asp:TemplateField>
                 <asp:TemplateField HeaderText="DATA">
                   <ItemTemplate>
-                    <asp:LinkButton ID="cmdData" CommandName="cmdData" CommandArgument='<%# Container.DataItemIndex %>' runat="server" Visible='<%# EVal("DataVisible") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Enter Inspection Data" OnClientClick='<%# "return confirm(""Do you want to enter Inspection Data ?"");" %>'><div class="btn btn-sm btn-primary"><i class="fa fa-1x  fa-arrow-circle-o-left"></i></div></asp:LinkButton>
+                    <asp:LinkButton 
+                      ID="cmdData" 
+                      CommandName="cmdData" 
+                      CommandArgument='<%# Container.DataItemIndex %>' 
+                      runat="server" 
+                      Visible='<%# EVal("DataVisible") %>' 
+                      AlternateText='<%# EVal("PrimaryKey") %>' 
+                      ToolTip="Enter Inspection Data" 
+                      OnClientClick='<%# "return confirm(""Do you want to enter Inspection Data ?"");" %>'>
+                      <div class="btn btn-sm btn-primary"><i class="fa fa-1x  fa-arrow-circle-o-left"></i></div>
+                    </asp:LinkButton>
                   </ItemTemplate>
                   <ItemStyle CssClass="alignCenter" />
                   <HeaderStyle CssClass="alignCenter" />
                 </asp:TemplateField>
                 <asp:TemplateField HeaderText="PAUSE/ RESUME">
                   <ItemTemplate>
-                    <asp:LinkButton ID="cmdPause" CommandName="cmdPause" CommandArgument='<%# Container.DataItemIndex %>' runat="server" Visible='<%# EVal("PauseVisible") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Pause Call" OnClientClick='<%# "return confirm(""Do you want to Pause Call ?"");" %>'><div class="btn btn-sm btn-warning">PAUSE</div></asp:LinkButton>
-                    <asp:LinkButton ID="cmdResume" CommandName="cmdResume" CommandArgument='<%# Container.DataItemIndex %>' runat="server" Visible='<%# EVal("ResumeVisible") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Resume Call" OnClientClick='<%# "return confirm(""Do you want to Resume Call ?"");" %>'><div class="btn btn-sm btn-success">RESUME</i></div></asp:LinkButton>
+                    <asp:LinkButton 
+                      ID="cmdPause" 
+                      CommandName="cmdPause" 
+                      CommandArgument='<%# Container.DataItemIndex %>' 
+                      runat="server" 
+                      Visible='<%# EVal("PauseVisible") %>' 
+                      AlternateText='<%# EVal("PrimaryKey") %>' 
+                      ToolTip="Pause Call" 
+                      OnClientClick='<%# "return confirm(""Do you want to Pause Call ?"");" %>'>
+                      <div class="btn btn-sm btn-warning">PAUSE</div>
+                    </asp:LinkButton>
+                    <asp:LinkButton 
+                      ID="cmdResume" 
+                      CommandName="cmdResume" 
+                      CommandArgument='<%# Container.DataItemIndex %>' 
+                      runat="server" 
+                      Visible='<%# EVal("ResumeVisible") %>' 
+                      AlternateText='<%# EVal("PrimaryKey") %>' 
+                      ToolTip="Resume Call" 
+                      OnClientClick='<%# "return confirm(""Do you want to Resume Call ?"");" %>'>
+                      <div class="btn btn-sm btn-success">RESUME</i></div>
+                    </asp:LinkButton>
                   </ItemTemplate>
                   <ItemStyle CssClass="alignCenter" />
                   <HeaderStyle CssClass="alignCenter" />

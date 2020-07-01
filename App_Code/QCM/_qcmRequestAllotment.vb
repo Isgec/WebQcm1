@@ -69,6 +69,24 @@ Namespace SIS.QCM
       End Using
       Return Results
     End Function
+    Public Shared Function qcmRequestAllotmentGetByID(ByVal RequestID As Int32, comp As String) As SIS.QCM.qcmRequestAllotment
+      Dim Results As SIS.QCM.qcmRequestAllotment = Nothing
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString(comp))
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.StoredProcedure
+          Cmd.CommandText = "spqcmRequestsSelectByID"
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RequestID", SqlDbType.Int, RequestID.ToString.Length, RequestID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
+          Con.Open()
+          Dim Reader As SqlDataReader = Cmd.ExecuteReader()
+          If Reader.Read() Then
+            Results = New SIS.QCM.qcmRequestAllotment(Reader)
+          End If
+          Reader.Close()
+        End Using
+      End Using
+      Return Results
+    End Function
     'Select By ID One Record Filtered Overloaded GetByID
     <DataObjectMethod(DataObjectMethodType.Select)> _
     Public Shared Function qcmRequestAllotmentGetByID(ByVal RequestID As Int32, ByVal Filter_ProjectID As String, ByVal Filter_SupplierID As String) As SIS.QCM.qcmRequestAllotment

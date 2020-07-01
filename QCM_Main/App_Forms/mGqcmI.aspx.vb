@@ -10,10 +10,11 @@ Partial Class mG_qcmI
   End Sub
   Private Sub GVqcmRequestAllotment_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles GVqcmRequestAllotment.RowCommand
     If e.CommandName.ToLower = "cmdStart".ToLower Then
-      Dim RequestID As Integer = GVqcmRequestAllotment.DataKeys(e.CommandArgument).Value
+      Dim RequestID As Integer = GVqcmRequestAllotment.DataKeys(e.CommandArgument).Values(RequestID)
+      Dim Company As String = GVqcmRequestAllotment.DataKeys(e.CommandArgument).Values("Company")
       Dim mRet As String = ""
       Try
-        mRet = SIS.QCM.qcmRequestAllotment.RequestStarted(RequestID)
+        mRet = SIS.QCM.qcmRequestAllotment.RequestStarted(RequestID, Company)
         If mRet <> String.Empty Then
           ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", "alert('" & New JavaScriptSerializer().Serialize(mRet) & "');", True)
         End If
@@ -23,20 +24,22 @@ Partial Class mG_qcmI
       End Try
     End If
     If e.CommandName.ToLower = "cmdData".ToLower Then
-      Dim RequestID As Integer = GVqcmRequestAllotment.DataKeys(e.CommandArgument).Value
+      Dim RequestID As Integer = GVqcmRequestAllotment.DataKeys(e.CommandArgument).Values(RequestID)
+      Dim Company As String = GVqcmRequestAllotment.DataKeys(e.CommandArgument).Values("Company")
       Dim mRet As String = ""
       Try
-        Dim RedirectURL As String = "~/QcmData.aspx?data=" & RequestID & "&src=mapp&emp=" & HttpContext.Current.Session("LoginID")
+        Dim RedirectURL As String = "~/QcmData.aspx?data=" & RequestID & "&src=mapp&emp=" & HttpContext.Current.Session("LoginID") & "&comp=" & Company
         Response.Redirect(RedirectURL)
       Catch ex As Exception
         ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", "alert('" & New JavaScriptSerializer().Serialize(ex.Message) & "');", True)
       End Try
     End If
     If e.CommandName.ToLower = "cmdPause".ToLower Then
-      Dim RequestID As Integer = GVqcmRequestAllotment.DataKeys(e.CommandArgument).Value
+      Dim RequestID As Integer = GVqcmRequestAllotment.DataKeys(e.CommandArgument).Values(RequestID)
+      Dim Company As String = GVqcmRequestAllotment.DataKeys(e.CommandArgument).Values("Company")
       Dim mRet As String = ""
       Try
-        mRet = SIS.QCM.qcmRequestAllotment.RequestPaused(RequestID)
+        mRet = SIS.QCM.qcmRequestAllotment.RequestPaused(RequestID, Company)
         If mRet <> String.Empty Then
           ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", "alert('" & New JavaScriptSerializer().Serialize(mRet) & "');", True)
         End If
@@ -46,10 +49,11 @@ Partial Class mG_qcmI
       End Try
     End If
     If e.CommandName.ToLower = "cmdResume".ToLower Then
-      Dim RequestID As Integer = GVqcmRequestAllotment.DataKeys(e.CommandArgument).Value
+      Dim RequestID As Integer = GVqcmRequestAllotment.DataKeys(e.CommandArgument).Values(RequestID)
+      Dim Company As String = GVqcmRequestAllotment.DataKeys(e.CommandArgument).Values("Company")
       Dim mRet As String = ""
       Try
-        mRet = SIS.QCM.qcmRequestAllotment.RequestResumed(RequestID)
+        mRet = SIS.QCM.qcmRequestAllotment.RequestResumed(RequestID, Company)
         If mRet <> String.Empty Then
           ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", "alert('" & New JavaScriptSerializer().Serialize(mRet) & "');", True)
         End If
@@ -59,10 +63,11 @@ Partial Class mG_qcmI
       End Try
     End If
     If e.CommandName.ToLower = "cmdClose".ToLower Then
-      Dim RequestID As Integer = GVqcmRequestAllotment.DataKeys(e.CommandArgument).Value
+      Dim RequestID As Integer = GVqcmRequestAllotment.DataKeys(e.CommandArgument).Values(RequestID)
+      Dim Company As String = GVqcmRequestAllotment.DataKeys(e.CommandArgument).Values("Company")
       Dim mRet As String = ""
       Try
-        mRet = SIS.QCM.qcmRequestAllotment.RequestClosed(RequestID)
+        mRet = SIS.QCM.qcmRequestAllotment.RequestClosed(RequestID, Company)
         If mRet <> String.Empty Then
           ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", "alert('" & New JavaScriptSerializer().Serialize(mRet) & "');", True)
         End If

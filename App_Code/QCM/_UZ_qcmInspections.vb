@@ -55,7 +55,11 @@ Namespace SIS.QCM
       End If
       Dim _Result As SIS.QCM.qcmInspections = qcmInspectionsInsert(Record)
       'update inspected
-      SIS.QCM.qcmRequests.UpdateInspected(_Result)
+      If Record.Company = "" Then
+        SIS.QCM.qcmRequests.UpdateInspected(_Result)
+      Else
+        SIS.QCM.qcmRequests.UpdateInspected(_Result, Record.Company)
+      End If
       Return _Result
     End Function
     Public Shared Function UZ_qcmInspectionsUpdate(ByVal Record As SIS.QCM.qcmInspections) As SIS.QCM.qcmInspections

@@ -1,10 +1,10 @@
 Partial Class GF_qcmRequestAllotment
   Inherits SIS.SYS.GridBase
-	<System.Web.Services.WebMethod(EnableSession:=True)> _
-	Public Shared Function GetSMSData(ByVal value As String) As String
-		Return SIS.QCM.qcmRequestAllotment.GetSMSData(value)
-	End Function
-	<System.Web.Services.WebMethod(EnableSession:=True)> _
+  '<System.Web.Services.WebMethod(EnableSession:=True)> _
+  'Public Shared Function GetSMSData(ByVal value As String) As String
+  '	Return SIS.QCM.qcmRequestAllotment.GetSMSData(value)
+  'End Function
+  <System.Web.Services.WebMethod(EnableSession:=True)> _
 	Public Shared Function SendEMail(ByVal value As String) As String
 		Return SIS.QCM.qcmRequestAllotment.SendSMSandEMail(value)
 	End Function

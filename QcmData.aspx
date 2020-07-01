@@ -17,7 +17,7 @@
   </ASP:ScriptManager>
       <asp:FormView ID="FVqcmInspections"
 	      runat = "server"
-	      DataKeyNames = "RequestID,InspectionID"
+	      DataKeyNames = "RequestID,InspectionID,Company"
 	      DataSourceID = "ODSqcmInspections"
 	      DefaultMode = "Insert" CssClass="sis_formview">
 	      <InsertItemTemplate>
@@ -33,6 +33,14 @@
                   Width="70px"
 						      Text='<%# Bind("RequestID") %>'
                   Enabled="false"
+						      Runat="Server" />
+					      <asp:TextBox
+						      ID = "F_Company"
+						      CssClass = "mypktxt"
+                  Width="70px"
+						      Text='<%# Bind("Company") %>'
+                  Enabled="false"
+                  style="display:none;"
 						      Runat="Server" />
               </td>
 			      </tr>

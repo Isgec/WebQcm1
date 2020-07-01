@@ -31,10 +31,11 @@ Partial Class QcmData
     HttpContext.Current.Session("LoginID") = "0340"
     If Request.QueryString("data") IsNot Nothing Then
       Dim ReqID As String = Request.QueryString("data")
-      If ReqID <> "" Then
+      Dim Comp As String = Request.QueryString("comp")
+      If ReqID <> "" AndAlso Comp <> "" Then
         Dim mErr As Boolean = False
         Dim emsg As String = ""
-        Dim tmp As SIS.QCM.qcmRequestAllotment = SIS.QCM.qcmRequestAllotment.qcmRequestAllotmentGetByID(ReqID)
+        Dim tmp As SIS.QCM.qcmRequestAllotment = SIS.QCM.qcmRequestAllotment.qcmRequestAllotmentGetByID(ReqID, Comp)
         Select Case tmp.RequestStateID
           Case "ALLOTED", "REALLOTED"
             mErr = True
@@ -47,6 +48,7 @@ Partial Class QcmData
         If Not mErr Then
           HttpContext.Current.Session("LoginID") = tmp.AllotedTo
           CType(FVqcmInspections.FindControl("F_RequestID"), TextBox).Text = tmp.RequestID
+          CType(FVqcmInspections.FindControl("F_Company"), TextBox).Text = Comp
           If tmp.TotalRequestedQuantity.Trim = "" Then
             tmp.TotalRequestedQuantity = "0.00"
           End If

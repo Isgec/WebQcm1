@@ -96,31 +96,35 @@ Namespace SIS.QCM
       End Get
     End Property
     Public Shared Function UZ_qcmRequestAllotedToMobile(ByVal SearchState As Boolean, ByVal SearchText As String, ByVal AllotedTo As String) As List(Of SIS.QCM.qcmRequestAllotment)
-      Dim Results As List(Of SIS.QCM.qcmRequestAllotment) = Nothing
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
-        Using Cmd As SqlCommand = Con.CreateCommand()
-          Cmd.CommandType = CommandType.StoredProcedure
-          Cmd.CommandText = "spqcm_LG_RequestAllotedToMobile"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@AllotedTo", SqlDbType.NVarChar, 8, AllotedTo)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@KeyWord", SqlDbType.NVarChar, 250, SearchText)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SearchState", SqlDbType.Bit, 3, SearchState)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@StartRowIndex", SqlDbType.Int, -1, 0)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@MaximumRows", SqlDbType.Int, -1, 9999)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OrderBy", SqlDbType.NVarChar, 50, "RequestID DESC")
-          Cmd.Parameters.Add("@RecordCount", SqlDbType.Int)
-          Cmd.Parameters("@RecordCount").Direction = ParameterDirection.Output
-          RecordCount = -1
-          Results = New List(Of SIS.QCM.qcmRequestAllotment)()
-          Con.Open()
-          Dim Reader As SqlDataReader = Cmd.ExecuteReader()
-          While (Reader.Read())
-            Results.Add(New SIS.QCM.qcmRequestAllotment(Reader))
-          End While
-          Reader.Close()
-          RecordCount = Cmd.Parameters("@RecordCount").Value
+      Dim Results As New List(Of SIS.QCM.qcmRequestAllotment)
+      Dim aComp() As String = {"700", "651", "200"}
+      RecordCount = -1
+      For Each cmp As String In aComp
+        Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString(cmp))
+          Using Cmd As SqlCommand = Con.CreateCommand()
+            Cmd.CommandType = CommandType.StoredProcedure
+            Cmd.CommandText = "spqcm_LG_RequestAllotedToMobile"
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@AllotedTo", SqlDbType.NVarChar, 8, AllotedTo)
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@KeyWord", SqlDbType.NVarChar, 250, SearchText)
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SearchState", SqlDbType.Bit, 3, SearchState)
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@StartRowIndex", SqlDbType.Int, -1, 0)
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@MaximumRows", SqlDbType.Int, -1, 9999)
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OrderBy", SqlDbType.NVarChar, 50, "RequestID DESC")
+            Cmd.Parameters.Add("@RecordCount", SqlDbType.Int)
+            Cmd.Parameters("@RecordCount").Direction = ParameterDirection.Output
+            Con.Open()
+            Dim Reader As SqlDataReader = Cmd.ExecuteReader()
+            While (Reader.Read())
+              Dim x As SIS.QCM.qcmRequestAllotment = New SIS.QCM.qcmRequestAllotment(Reader)
+              x.Company = cmp
+              Results.Add(x)
+            End While
+            Reader.Close()
+            RecordCount += Cmd.Parameters("@RecordCount").Value
+          End Using
         End Using
-      End Using
+      Next
       Return Results
     End Function
     Public Shared Function UZ_qcmRequestAllotedTo(ByVal StartRowIndex As Integer, ByVal MaximumRows As Integer, ByVal OrderBy As String, ByVal SearchState As Boolean, ByVal SearchText As String, ByVal AllotedTo As String) As List(Of SIS.QCM.qcmRequestAllotment)
@@ -260,174 +264,174 @@ Namespace SIS.QCM
       _Rec = SIS.QCM.qcmRequestAllotment.qcmRequestAllotmentGetByID(RequestID)
       Return SendSMSandEMail(_Rec)
     End Function
-    Public Shared Function GetPendigRequestHTML_Trial(ByVal EMPID As String, ByVal mMailID As String) As String
-      Dim mLinkID As String = ""
-      Dim tmpAuthority As String = "cloud.isgec.co.in"
-      If HttpContext.Current.Request.Url.Authority.ToLower = "localhost" Then
-        tmpAuthority = "localhost"
-      End If
-      Dim sb As New StringBuilder
-      With sb
-        Dim tmps As List(Of SIS.QCM.qcmRequestAllotment) = SIS.QCM.qcmRequestAllotment.UZ_qcmPendingInspectionSelectList(EMPID)
-        If tmps.Count > 0 Then
-          .AppendLine("<script type=""text/javascript""> ")
-          .AppendLine("function w_open(e) {")
-          .AppendLine("  javascript:window.open(e, 'winX', 'left=20,top=20,width=1000,height=700,toolbar=1,resizable=1,scrollbars=1'); return false;")
-          .AppendLine("}")
-          .AppendLine("</script>")
-          .AppendLine("<table style=""width:900px;margin-top:15px"" border=""1"" cellspacing=""1"" cellpadding=""1"">")
-          .AppendLine("<tr><td colspan=""5"" style=""color:red"" align=""center""><h3><b>PENDING INSPECTION CALL REQUEST</b></h3></td></tr>")
-          .AppendLine("<tr><td colspan=""5"" align=""center""><h4>Please Click on Link given in <b>START</b> column against each pending call. It will update call ispection <b>START DATE</b> and click on link in <b>CLOSE</b> column of the started inspection to <b>CLOSE</b> the call.</h4></td></tr>")
-          .AppendLine("<tr><td bgcolor=""lightgray""><b>REQUEST DETAILS</b></td>")
-          .AppendLine("<td bgcolor=""lightgray""><b>START</b></td>")
-          .AppendLine("<td bgcolor=""lightgray""><b>INSPECTION DATA</b></td>")
-          .AppendLine("<td bgcolor=""lightgray""><b>PAUSE/RESUME</b></td>")
-          .AppendLine("<td bgcolor=""lightgray""><b>CLOSE</b></td></tr>")
-          For Each tm As SIS.QCM.qcmRequestAllotment In tmps
-            .AppendLine("<tr><td>")
-            .AppendLine("<li>Request No: " & tm.RequestID & "</li>")
-            .AppendLine("<li>" & tm.IDM_Projects6_Description & " [" & tm.ProjectID & "]" & "</li>")
-            .AppendLine("<li>Order No: " & tm.OrderNo & "</li>")
-            .AppendLine("<li>" & tm.IDM_Vendors7_Description & "</li>")
-            .AppendLine("<li>" & tm.AllotmentRemarks & "</li>")
-            .AppendLine("<li>Inspection Date: " & tm.AllotedFinishDate & "</li>")
-            .AppendLine("</td>")
-            .AppendLine("<td style=""vertical-align:middle;text-align:center"">")
-            If tm.RequestStateID = "ALLOTED" Or tm.RequestStateID = "REALLOTED" Then
-              mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
-              .AppendLine("<input type='button' value='START' onclick=""return w_open('http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?start=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & "');"" style=""color:Green; font-weight:bold;""/>")
-              .AppendLine("<input type='button' value='START' onclick=""alert('hi');"" style=""color:Green; font-weight:bold;""/>")
-            End If
-            .AppendLine("</td>")
-            .AppendLine("<td style=""vertical-align:middle;text-align:center"">")
-            If tm.RequestStateID = "INSPECTED" Then
-              If Convert.ToDateTime(tm.CreatedOn) >= Convert.ToDateTime("26/07/2017") Then
-                If Not tm.Paused Then
-                  mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
-                  .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmData.aspx?data=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Green; font-weight:bold;"">INSPECTION DATA</a>")
-                End If
-              End If
-            End If
-            .AppendLine("</td>")
-            .AppendLine("<td style=""vertical-align:middle;text-align:center"">")
-            If tm.RequestStateID = "INSPECTED" Then
-              If Not tm.Paused Then
-                mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
-                .AppendLine("<input type='button' value='PAUSE' onclick=""return w_open('http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?pause=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & "');"" style=""color:Green; font-weight:bold;""/>")
-              Else
-                mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
-                .AppendLine("<input type='button' value='RESUME' onclick=""return w_open('http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?resume=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & "');"" style=""color:Green; font-weight:bold;""/>")
-              End If
-            End If
-            .AppendLine("</td>")
-            .AppendLine("<td style=""vertical-align:middle;text-align:center"">")
-            If tm.RequestStateID = "INSPECTED" Then
-              If Not tm.Paused Then
-                Dim tmpIns As List(Of SIS.QCM.qcmInspections) = SIS.QCM.qcmInspections.qcmInspectionsSelectList(0, 10, "", False, "", tm.RequestID)
-                If tmpIns.Count > 1 Then
-                  mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
-                  .AppendLine("<input type='button' value='STOP' onclick=""return w_open('http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?stop=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & "');"" style=""color:Green; font-weight:bold;""/>")
-                End If
-              End If
-            End If
-            .AppendLine("</td>")
-            .AppendLine("</tr>")
-          Next
-          .AppendLine("<tr>")
-          .AppendLine("<td colspan=""3"" style=""vertical-align:middle;text-align:center"">")
-          mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
-          .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?emp=" & EMPID & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Green; font-weight:bold;"">Send me latest Pending List</a>")
-          .AppendLine("</td></tr>")
-          .AppendLine("</table>")
-        End If
+    'Public Shared Function GetPendigRequestHTML_Trial(ByVal EMPID As String, ByVal mMailID As String) As String
+    '  Dim mLinkID As String = ""
+    '  Dim tmpAuthority As String = "cloud.isgec.co.in"
+    '  If HttpContext.Current.Request.Url.Authority.ToLower = "localhost" Then
+    '    tmpAuthority = "localhost"
+    '  End If
+    '  Dim sb As New StringBuilder
+    '  With sb
+    '    Dim tmps As List(Of SIS.QCM.qcmRequestAllotment) = SIS.QCM.qcmRequestAllotment.UZ_qcmPendingInspectionSelectList(EMPID)
+    '    If tmps.Count > 0 Then
+    '      .AppendLine("<script type=""text/javascript""> ")
+    '      .AppendLine("function w_open(e) {")
+    '      .AppendLine("  javascript:window.open(e, 'winX', 'left=20,top=20,width=1000,height=700,toolbar=1,resizable=1,scrollbars=1'); return false;")
+    '      .AppendLine("}")
+    '      .AppendLine("</script>")
+    '      .AppendLine("<table style=""width:900px;margin-top:15px"" border=""1"" cellspacing=""1"" cellpadding=""1"">")
+    '      .AppendLine("<tr><td colspan=""5"" style=""color:red"" align=""center""><h3><b>PENDING INSPECTION CALL REQUEST</b></h3></td></tr>")
+    '      .AppendLine("<tr><td colspan=""5"" align=""center""><h4>Please Click on Link given in <b>START</b> column against each pending call. It will update call ispection <b>START DATE</b> and click on link in <b>CLOSE</b> column of the started inspection to <b>CLOSE</b> the call.</h4></td></tr>")
+    '      .AppendLine("<tr><td bgcolor=""lightgray""><b>REQUEST DETAILS</b></td>")
+    '      .AppendLine("<td bgcolor=""lightgray""><b>START</b></td>")
+    '      .AppendLine("<td bgcolor=""lightgray""><b>INSPECTION DATA</b></td>")
+    '      .AppendLine("<td bgcolor=""lightgray""><b>PAUSE/RESUME</b></td>")
+    '      .AppendLine("<td bgcolor=""lightgray""><b>CLOSE</b></td></tr>")
+    '      For Each tm As SIS.QCM.qcmRequestAllotment In tmps
+    '        .AppendLine("<tr><td>")
+    '        .AppendLine("<li>Request No: " & tm.RequestID & "</li>")
+    '        .AppendLine("<li>" & tm.IDM_Projects6_Description & " [" & tm.ProjectID & "]" & "</li>")
+    '        .AppendLine("<li>Order No: " & tm.OrderNo & "</li>")
+    '        .AppendLine("<li>" & tm.IDM_Vendors7_Description & "</li>")
+    '        .AppendLine("<li>" & tm.AllotmentRemarks & "</li>")
+    '        .AppendLine("<li>Inspection Date: " & tm.AllotedFinishDate & "</li>")
+    '        .AppendLine("</td>")
+    '        .AppendLine("<td style=""vertical-align:middle;text-align:center"">")
+    '        If tm.RequestStateID = "ALLOTED" Or tm.RequestStateID = "REALLOTED" Then
+    '          mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
+    '          .AppendLine("<input type='button' value='START' onclick=""return w_open('http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?start=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & "');"" style=""color:Green; font-weight:bold;""/>")
+    '          .AppendLine("<input type='button' value='START' onclick=""alert('hi');"" style=""color:Green; font-weight:bold;""/>")
+    '        End If
+    '        .AppendLine("</td>")
+    '        .AppendLine("<td style=""vertical-align:middle;text-align:center"">")
+    '        If tm.RequestStateID = "INSPECTED" Then
+    '          If Convert.ToDateTime(tm.CreatedOn) >= Convert.ToDateTime("26/07/2017") Then
+    '            If Not tm.Paused Then
+    '              mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
+    '              .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmData.aspx?data=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Green; font-weight:bold;"">INSPECTION DATA</a>")
+    '            End If
+    '          End If
+    '        End If
+    '        .AppendLine("</td>")
+    '        .AppendLine("<td style=""vertical-align:middle;text-align:center"">")
+    '        If tm.RequestStateID = "INSPECTED" Then
+    '          If Not tm.Paused Then
+    '            mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
+    '            .AppendLine("<input type='button' value='PAUSE' onclick=""return w_open('http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?pause=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & "');"" style=""color:Green; font-weight:bold;""/>")
+    '          Else
+    '            mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
+    '            .AppendLine("<input type='button' value='RESUME' onclick=""return w_open('http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?resume=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & "');"" style=""color:Green; font-weight:bold;""/>")
+    '          End If
+    '        End If
+    '        .AppendLine("</td>")
+    '        .AppendLine("<td style=""vertical-align:middle;text-align:center"">")
+    '        If tm.RequestStateID = "INSPECTED" Then
+    '          If Not tm.Paused Then
+    '            Dim tmpIns As List(Of SIS.QCM.qcmInspections) = SIS.QCM.qcmInspections.qcmInspectionsSelectList(0, 10, "", False, "", tm.RequestID)
+    '            If tmpIns.Count > 1 Then
+    '              mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
+    '              .AppendLine("<input type='button' value='STOP' onclick=""return w_open('http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?stop=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & "');"" style=""color:Green; font-weight:bold;""/>")
+    '            End If
+    '          End If
+    '        End If
+    '        .AppendLine("</td>")
+    '        .AppendLine("</tr>")
+    '      Next
+    '      .AppendLine("<tr>")
+    '      .AppendLine("<td colspan=""3"" style=""vertical-align:middle;text-align:center"">")
+    '      mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
+    '      .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?emp=" & EMPID & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Green; font-weight:bold;"">Send me latest Pending List</a>")
+    '      .AppendLine("</td></tr>")
+    '      .AppendLine("</table>")
+    '    End If
 
-      End With
-      Return sb.ToString
-    End Function
-    Public Shared Function GetPendigRequestHTML(ByVal EMPID As String, ByVal mMailID As String) As String
-      Dim mLinkID As String = ""
-      Dim tmpAuthority As String = "cloud.isgec.co.in"
-      If HttpContext.Current.Request.Url.Authority.ToLower = "localhost" Then
-        tmpAuthority = "localhost"
-      End If
-      Dim sb As New StringBuilder
-      With sb
-        Dim tmps As List(Of SIS.QCM.qcmRequestAllotment) = SIS.QCM.qcmRequestAllotment.UZ_qcmPendingInspectionSelectList(EMPID)
-        If tmps.Count > 0 Then
-          .AppendLine("<table style=""width:900px;margin-top:15px"" border=""1"" cellspacing=""1"" cellpadding=""1"">")
-          .AppendLine("<tr><td colspan=""5"" style=""color:red"" align=""center""><h3><b>PENDING INSPECTION CALL REQUEST</b></h3></td></tr>")
-          .AppendLine("<tr><td colspan=""5"" align=""center""><h4>Please Click on Link given in <b>START</b> column against each pending call. It will update call ispection <b>START DATE</b> and click on link in <b>CLOSE</b> column of the started inspection to <b>CLOSE</b> the call.</h4></td></tr>")
-          .AppendLine("<tr><td bgcolor=""lightgray""><b>REQUEST DETAILS</b></td>")
-          .AppendLine("<td bgcolor=""lightgray""><b>START</b></td>")
-          .AppendLine("<td bgcolor=""lightgray""><b>INSPECTION DATA</b></td>")
-          .AppendLine("<td bgcolor=""lightgray""><b>PAUSE/RESUME</b></td>")
-          .AppendLine("<td bgcolor=""lightgray""><b>CLOSE</b></td></tr>")
-          For Each tm As SIS.QCM.qcmRequestAllotment In tmps
-            .AppendLine("<tr><td>")
-            .AppendLine("<li>Request No: " & tm.RequestID & "</li>")
-            .AppendLine("<li>" & tm.IDM_Projects6_Description & " [" & tm.ProjectID & "]" & "</li>")
-            .AppendLine("<li>Order No: " & tm.OrderNo & "</li>")
-            .AppendLine("<li>" & tm.IDM_Vendors7_Description & "</li>")
-            .AppendLine("<li>" & tm.FK_QCM_Requests_Createdby.EmployeeName & "</li>")
-            .AppendLine("<li>" & tm.AllotmentRemarks & "</li>")
-            .AppendLine("<li>Inspection Date: " & tm.AllotedFinishDate & "</li>")
-            .AppendLine("</td>")
-            .AppendLine("<td style=""vertical-align:middle;text-align:center"">")
-            If tm.RequestStateID = "ALLOTED" Or tm.RequestStateID = "REALLOTED" Then
-              mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
-              .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?start=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Green; font-weight:bold;"">STARTED</a>")
-            End If
-            .AppendLine("</td>")
-            .AppendLine("<td style=""vertical-align:middle;text-align:center"">")
-            If tm.RequestStateID = "INSPECTED" Then
-              If Convert.ToDateTime(tm.CreatedOn) >= Convert.ToDateTime("26/07/2017") Then
-                If Not tm.Paused Then
-                  mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
-                  .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmData.aspx?data=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Green; font-weight:bold;"">INSPECTION DATA</a>")
-                End If
-              End If
-            End If
-            .AppendLine("</td>")
-            .AppendLine("<td style=""vertical-align:middle;text-align:center"">")
-            If tm.RequestStateID = "INSPECTED" Then
-              If Not tm.Paused Then
-                mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
-                .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?pause=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Gold; font-weight:bold;"">PAUSE</a>")
-              Else
-                mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
-                .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?resume=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Gold; font-weight:bold;"">RESUME</a>")
-              End If
-            End If
-            .AppendLine("</td>")
-            .AppendLine("<td style=""vertical-align:middle;text-align:center"">")
-            If tm.RequestStateID = "INSPECTED" Then
-              If Not tm.Paused Then
-                Dim tmpIns As List(Of SIS.QCM.qcmInspections) = SIS.QCM.qcmInspections.qcmInspectionsSelectList(0, 10, "", False, "", tm.RequestID)
-                If tmpIns.Count > 1 Then
-                  mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
-                  .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?stop=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Green; font-weight:bold;"">CLOSED</a>")
-                End If
-              End If
-            End If
-            .AppendLine("</td>")
-            .AppendLine("</tr>")
-          Next
-          .AppendLine("<tr>")
-          .AppendLine("<td colspan=""3"" style=""vertical-align:middle;text-align:center"">")
-          mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
-          .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?emp=" & EMPID & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Green; font-weight:bold;"">Send me latest Pending List</a>")
-          .AppendLine("</td></tr>")
-          .AppendLine("</table>")
-        End If
+    '  End With
+    '  Return sb.ToString
+    'End Function
+    'Public Shared Function GetPendigRequestHTML(ByVal EMPID As String, ByVal mMailID As String) As String
+    '  Dim mLinkID As String = ""
+    '  Dim tmpAuthority As String = "cloud.isgec.co.in"
+    '  If HttpContext.Current.Request.Url.Authority.ToLower = "localhost" Then
+    '    tmpAuthority = "localhost"
+    '  End If
+    '  Dim sb As New StringBuilder
+    '  With sb
+    '    Dim tmps As List(Of SIS.QCM.qcmRequestAllotment) = SIS.QCM.qcmRequestAllotment.UZ_qcmPendingInspectionSelectList(EMPID)
+    '    If tmps.Count > 0 Then
+    '      .AppendLine("<table style=""width:900px;margin-top:15px"" border=""1"" cellspacing=""1"" cellpadding=""1"">")
+    '      .AppendLine("<tr><td colspan=""5"" style=""color:red"" align=""center""><h3><b>PENDING INSPECTION CALL REQUEST</b></h3></td></tr>")
+    '      .AppendLine("<tr><td colspan=""5"" align=""center""><h4>Please Click on Link given in <b>START</b> column against each pending call. It will update call ispection <b>START DATE</b> and click on link in <b>CLOSE</b> column of the started inspection to <b>CLOSE</b> the call.</h4></td></tr>")
+    '      .AppendLine("<tr><td bgcolor=""lightgray""><b>REQUEST DETAILS</b></td>")
+    '      .AppendLine("<td bgcolor=""lightgray""><b>START</b></td>")
+    '      .AppendLine("<td bgcolor=""lightgray""><b>INSPECTION DATA</b></td>")
+    '      .AppendLine("<td bgcolor=""lightgray""><b>PAUSE/RESUME</b></td>")
+    '      .AppendLine("<td bgcolor=""lightgray""><b>CLOSE</b></td></tr>")
+    '      For Each tm As SIS.QCM.qcmRequestAllotment In tmps
+    '        .AppendLine("<tr><td>")
+    '        .AppendLine("<li>Request No: " & tm.RequestID & "</li>")
+    '        .AppendLine("<li>" & tm.IDM_Projects6_Description & " [" & tm.ProjectID & "]" & "</li>")
+    '        .AppendLine("<li>Order No: " & tm.OrderNo & "</li>")
+    '        .AppendLine("<li>" & tm.IDM_Vendors7_Description & "</li>")
+    '        .AppendLine("<li>" & tm.FK_QCM_Requests_Createdby.EmployeeName & "</li>")
+    '        .AppendLine("<li>" & tm.AllotmentRemarks & "</li>")
+    '        .AppendLine("<li>Inspection Date: " & tm.AllotedFinishDate & "</li>")
+    '        .AppendLine("</td>")
+    '        .AppendLine("<td style=""vertical-align:middle;text-align:center"">")
+    '        If tm.RequestStateID = "ALLOTED" Or tm.RequestStateID = "REALLOTED" Then
+    '          mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
+    '          .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?start=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Green; font-weight:bold;"">STARTED</a>")
+    '        End If
+    '        .AppendLine("</td>")
+    '        .AppendLine("<td style=""vertical-align:middle;text-align:center"">")
+    '        If tm.RequestStateID = "INSPECTED" Then
+    '          If Convert.ToDateTime(tm.CreatedOn) >= Convert.ToDateTime("26/07/2017") Then
+    '            If Not tm.Paused Then
+    '              mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
+    '              .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmData.aspx?data=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Green; font-weight:bold;"">INSPECTION DATA</a>")
+    '            End If
+    '          End If
+    '        End If
+    '        .AppendLine("</td>")
+    '        .AppendLine("<td style=""vertical-align:middle;text-align:center"">")
+    '        If tm.RequestStateID = "INSPECTED" Then
+    '          If Not tm.Paused Then
+    '            mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
+    '            .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?pause=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Gold; font-weight:bold;"">PAUSE</a>")
+    '          Else
+    '            mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
+    '            .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?resume=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Gold; font-weight:bold;"">RESUME</a>")
+    '          End If
+    '        End If
+    '        .AppendLine("</td>")
+    '        .AppendLine("<td style=""vertical-align:middle;text-align:center"">")
+    '        If tm.RequestStateID = "INSPECTED" Then
+    '          If Not tm.Paused Then
+    '            Dim tmpIns As List(Of SIS.QCM.qcmInspections) = SIS.QCM.qcmInspections.qcmInspectionsSelectList(0, 10, "", False, "", tm.RequestID)
+    '            If tmpIns.Count > 1 Then
+    '              mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
+    '              .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?stop=" & tm.RequestID & "&emp=" & tm.AllotedTo & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Green; font-weight:bold;"">CLOSED</a>")
+    '            End If
+    '          End If
+    '        End If
+    '        .AppendLine("</td>")
+    '        .AppendLine("</tr>")
+    '      Next
+    '      .AppendLine("<tr>")
+    '      .AppendLine("<td colspan=""3"" style=""vertical-align:middle;text-align:center"">")
+    '      mLinkID = SIS.SYS.Utilities.ApplicationSpacific.NextLinkNo
+    '      .AppendLine("<a href=""http://" & tmpAuthority & "/WebQcm1/QcmCallInspected.aspx?emp=" & EMPID & "&MailID=" & mMailID & "&LinkID=" & mLinkID & """ style=""color:Green; font-weight:bold;"">Send me latest Pending List</a>")
+    '      .AppendLine("</td></tr>")
+    '      .AppendLine("</table>")
+    '    End If
 
-      End With
-      Return sb.ToString
-    End Function
+    '  End With
+    '  Return sb.ToString
+    'End Function
 
-    Public Shared Function RequestClosed(ByVal ReqID As String) As String
+    Public Shared Function RequestClosed(ByVal ReqID As String, comp As String) As String
       Dim mRet As String = ""
       Try
-        Dim oReq As SIS.QCM.qcmRequests = SIS.QCM.qcmRequests.qcmRequestsGetByID(ReqID)
+        Dim oReq As SIS.QCM.qcmRequests = SIS.QCM.qcmRequests.qcmRequestsGetByID(ReqID, comp)
         If oReq.RequestStateID = "CLOSED" Then Return "Already Closed"
         Dim oIns As New SIS.QCM.qcmInspections
         With oIns
@@ -446,7 +450,7 @@ Namespace SIS.QCM
           .InspectionRemarks = "Request closed through E-Mail Link"
           .FileAttached = False
         End With
-        SIS.QCM.qcmInspections.InsertData(oIns)
+        SIS.QCM.qcmInspections.InsertData(oIns, comp)
         With oReq
           .InspectionStatusID = 2
           .InspectionFinishDate = Now
@@ -462,9 +466,9 @@ Namespace SIS.QCM
           End If
           .TotalHrs = y - y1 + ((z - z1) / 100) 'Returns value including decimal position
         End With
-        SIS.QCM.qcmRequests.UpdateData(oReq)
+        SIS.QCM.qcmRequests.UpdateData(oReq, comp)
         Try
-          SendClosedEMail(ReqID)
+          SendClosedEMail(ReqID, comp)
         Catch ex As Exception
         End Try
       Catch ex As Exception
@@ -472,10 +476,10 @@ Namespace SIS.QCM
       End Try
       Return mRet
     End Function
-    Public Shared Function RequestPaused(ByVal ReqID As String) As String
+    Public Shared Function RequestPaused(ByVal ReqID As String, Comp As String) As String
       Dim mRet As String = ""
       Try
-        Dim oReq As SIS.QCM.qcmRequests = SIS.QCM.qcmRequests.qcmRequestsGetByID(ReqID)
+        Dim oReq As SIS.QCM.qcmRequests = SIS.QCM.qcmRequests.qcmRequestsGetByID(ReqID, Comp)
         If oReq.Paused Then Return "Already Paused"
         Dim oIns As New SIS.QCM.qcmInspections
         With oIns
@@ -494,26 +498,22 @@ Namespace SIS.QCM
           .InspectionRemarks = "Request Paused"
           .FileAttached = False
         End With
-        SIS.QCM.qcmInspections.InsertData(oIns)
+        SIS.QCM.qcmInspections.InsertData(oIns, Comp)
         With oReq
           .InspectionStatusID = 11
           .LastPausedOn = Now
           .Paused = True
         End With
-        SIS.QCM.qcmRequests.UpdateData(oReq)
-        Try
-          'SendInspectedEMail(ReqID)
-        Catch ex As Exception
-        End Try
+        SIS.QCM.qcmRequests.UpdateData(oReq, Comp)
       Catch ex As Exception
         mRet = ex.Message
       End Try
       Return mRet
     End Function
-    Public Shared Function RequestResumed(ByVal ReqID As String) As String
+    Public Shared Function RequestResumed(ByVal ReqID As String, comp As String) As String
       Dim mRet As String = ""
       Try
-        Dim oReq As SIS.QCM.qcmRequests = SIS.QCM.qcmRequests.qcmRequestsGetByID(ReqID)
+        Dim oReq As SIS.QCM.qcmRequests = SIS.QCM.qcmRequests.qcmRequestsGetByID(ReqID, comp)
         If Not oReq.Paused Then Return "Already Resumed"
         Dim oIns As New SIS.QCM.qcmInspections
         With oIns
@@ -532,7 +532,7 @@ Namespace SIS.QCM
           .InspectionRemarks = "Request Resumed"
           .FileAttached = False
         End With
-        SIS.QCM.qcmInspections.InsertData(oIns)
+        SIS.QCM.qcmInspections.InsertData(oIns, comp)
         With oReq
           Dim x As Integer = DateDiff(DateInterval.Minute, Convert.ToDateTime(.LastPausedOn), Now)
           Dim y As Integer = x \ 60 'Returns Integer Portion
@@ -547,22 +547,19 @@ Namespace SIS.QCM
           .Paused = False
           .ReturnRemarks = "Paused Hrs Calculated : min = " & x
         End With
-        SIS.QCM.qcmRequests.UpdateData(oReq)
-        Try
-          'SendInspectedEMail(ReqID)
-        Catch ex As Exception
-        End Try
+        SIS.QCM.qcmRequests.UpdateData(oReq, comp)
       Catch ex As Exception
         mRet = ex.Message
       End Try
       Return mRet
     End Function
-    Public Shared Function RequestStarted(ByVal ReqID As String) As String
+    Public Shared Function RequestStarted(ByVal ReqID As String, Comp As String) As String
       Dim mRet As String = ""
       Try
-        Dim oReq As SIS.QCM.qcmRequests = SIS.QCM.qcmRequests.qcmRequestsGetByID(ReqID)
+        Dim oReq As SIS.QCM.qcmRequests = SIS.QCM.qcmRequests.qcmRequestsGetByID(ReqID, Comp)
         If oReq.RequestStateID = "INSPECTED" Then Return "Already Started"
         Dim InspectorID As String = HttpContext.Current.Session("LoginID")
+        'Other Call started in Any Company
         Dim OtherStartedCount As Integer = SIS.QCM.qcmRequests.OtherStartedCall(InspectorID, ReqID)
         If OtherStartedCount <> 0 Then
           Return "More than one call can NOT be in STARTED/RESUMED state. Pl. close Call: " & OtherStartedCount & " first."
@@ -584,152 +581,154 @@ Namespace SIS.QCM
           .InspectionRemarks = "Request Started through E-Mail Link"
           .FileAttached = False
         End With
-        SIS.QCM.qcmInspections.InsertData(oIns)
+        SIS.QCM.qcmInspections.InsertData(oIns, Comp)
         With oReq
           .InspectionStatusID = 10
           .InspectionStartDate = Now
           .RequestStateID = "INSPECTED"
         End With
-        SIS.QCM.qcmRequests.UpdateData(oReq)
-        Try
-          'SendInspectedEMail(ReqID)
-          SIS.CT.ctUpdates.CT_InspectedInBlackCondition(oReq)
-        Catch ex As Exception
-        End Try
+        SIS.QCM.qcmRequests.UpdateData(oReq, Comp)
+        If Convert.ToBoolean(ConfigurationManager.AppSettings("UpdateCT")) Then
+          'UpdateCT is not customized for multi company
+          Try
+            SIS.CT.ctUpdates.CT_InspectedInBlackCondition(oReq)
+          Catch ex As Exception
+          End Try
+        End If
       Catch ex As Exception
         mRet = ex.Message
       End Try
       Return mRet
     End Function
-    Public Shared Function SendPendingCallEMail(ByVal EmpID As String) As String
-      Dim mMailID As String = SIS.SYS.Utilities.ApplicationSpacific.NextMailNo
-      Dim mRet As String = ""
-      Dim ToEMailID As String = ""
-      Dim FromEMailID As String = ""
-      Dim oEmp As SIS.QCM.qcmEmployees = SIS.QCM.qcmEmployees.qcmEmployeesGetByID(EmpID)
-      ToEMailID = oEmp.EMailID
-      FromEMailID = oEmp.EMailID
-      If ToEMailID <> String.Empty And FromEMailID <> String.Empty Then
-        Try
-          Dim oClient As SmtpClient = New SmtpClient()
+    'Public Shared Function SendPendingCallEMail(ByVal EmpID As String) As String
+    '  Dim mMailID As String = SIS.SYS.Utilities.ApplicationSpacific.NextMailNo
+    '  Dim mRet As String = ""
+    '  Dim ToEMailID As String = ""
+    '  Dim FromEMailID As String = ""
+    '  Dim oEmp As SIS.QCM.qcmEmployees = SIS.QCM.qcmEmployees.qcmEmployeesGetByID(EmpID)
+    '  ToEMailID = oEmp.EMailID
+    '  FromEMailID = oEmp.EMailID
+    '  If ToEMailID <> String.Empty And FromEMailID <> String.Empty Then
+    '    Try
+    '      Dim oClient As SmtpClient = New SmtpClient()
 
-          Dim oMsg As System.Net.Mail.MailMessage = New System.Net.Mail.MailMessage(FromEMailID, ToEMailID)
-          With oMsg
-            .IsBodyHtml = True
-            .Subject = "Pending Inspection Call List"
+    '      Dim oMsg As System.Net.Mail.MailMessage = New System.Net.Mail.MailMessage(FromEMailID, ToEMailID)
+    '      With oMsg
+    '        .IsBodyHtml = True
+    '        .Subject = "Pending Inspection Call List"
 
-            Dim sb As New StringBuilder
-            With sb
-              .Append(GetPendigRequestHTML(EmpID, mMailID))
-            End With
-            Try
-              Dim Header As String = ""
-              Header = Header & "<html xmlns=""http://www.w3.org/1999/xhtml"">"
-              Header = Header & "<head>"
-              Header = Header & "<title></title>"
-              Header = Header & "<style>"
-              Header = Header & "table{"
+    '        Dim sb As New StringBuilder
+    '        With sb
+    '          .Append(GetPendigRequestHTML(EmpID, mMailID))
+    '        End With
+    '        Try
+    '          Dim Header As String = ""
+    '          Header = Header & "<html xmlns=""http://www.w3.org/1999/xhtml"">"
+    '          Header = Header & "<head>"
+    '          Header = Header & "<title></title>"
+    '          Header = Header & "<style>"
+    '          Header = Header & "table{"
 
-              Header = Header & "border: solid 1pt black;"
-              Header = Header & "border-collapse:collapse;"
-              Header = Header & "font-family: Tahoma;}"
+    '          Header = Header & "border: solid 1pt black;"
+    '          Header = Header & "border-collapse:collapse;"
+    '          Header = Header & "font-family: Tahoma;}"
 
-              Header = Header & "td{"
-              Header = Header & "border: solid 1pt black;"
-              Header = Header & "font-family: Tahoma;"
-              Header = Header & "font-size: 12px;"
-              Header = Header & "vertical-align:top;}"
+    '          Header = Header & "td{"
+    '          Header = Header & "border: solid 1pt black;"
+    '          Header = Header & "font-family: Tahoma;"
+    '          Header = Header & "font-size: 12px;"
+    '          Header = Header & "vertical-align:top;}"
 
-              Header = Header & "</style>"
-              Header = Header & "</head>"
-              Header = Header & "<body>"
-              Header = Header & sb.ToString
-              Header = Header & "</body></html>"
-              oMsg.Body = Header
-            Catch ex As Exception
-              mRet = ex.Message
-            End Try
-          End With
-          oMsg.Body &= "<br/>Mail-ID: " & mMailID
-          If SIS.SYS.Utilities.ApplicationSpacific.IsTesting Then
-            oMsg.CC.Clear()
-            oMsg.To.Clear()
-            oMsg.To.Add(New MailAddress("lalit@isgec.co.in", "Lalit Gupta"))
-            oMsg.From = New MailAddress("lalit@isgec.co.in", "Lalit Gupta")
-          Else
-            oMsg.Bcc.Add(New MailAddress("qcmlog@isgec.co.in", "Quality Log"))
-          End If
-          oClient.Send(oMsg)
+    '          Header = Header & "</style>"
+    '          Header = Header & "</head>"
+    '          Header = Header & "<body>"
+    '          Header = Header & sb.ToString
+    '          Header = Header & "</body></html>"
+    '          oMsg.Body = Header
+    '        Catch ex As Exception
+    '          mRet = ex.Message
+    '        End Try
+    '      End With
+    '      oMsg.Body &= "<br/>Mail-ID: " & mMailID
+    '      If SIS.SYS.Utilities.ApplicationSpacific.IsTesting Then
+    '        oMsg.CC.Clear()
+    '        oMsg.To.Clear()
+    '        oMsg.To.Add(New MailAddress("lalit@isgec.co.in", "Lalit Gupta"))
+    '        oMsg.From = New MailAddress("lalit@isgec.co.in", "Lalit Gupta")
+    '      Else
+    '        oMsg.Bcc.Add(New MailAddress("qcmlog@isgec.co.in", "Quality Log"))
+    '      End If
+    '      oClient.Send(oMsg)
 
-          'Check Request Variables
-          Dim Prop As String = ""
-          Dim Head As String = ""
-          Dim xMailID As String = 0
-          Dim xLinkID As String = 0
-          For Each pi As System.Reflection.PropertyInfo In HttpContext.Current.Request.GetType.GetProperties
-            If pi.MemberType = Reflection.MemberTypes.Property Then
-              Try
-                Prop &= "<br/> " & pi.Name & " : " & pi.GetValue(HttpContext.Current.Request, Nothing)
-              Catch ex As Exception
-              End Try
-            End If
-          Next
-          For I As Integer = 0 To HttpContext.Current.Request.Headers.Count - 1
-            head &= "<br/> " & HttpContext.Current.Request.Headers.Keys(I) & " : " & HttpContext.Current.Request.Headers.Item(I)
-          Next
-          Dim RemoteIP As String = ""
-          Dim ip As String = String.Empty
-          ip = HttpContext.Current.Request.ServerVariables("HTTP_X_FORWARDED_FOR")
-          If Not String.IsNullOrEmpty(ip) Then
-            Dim ipRange As String() = ip.Split(","c)
-            Dim le As Integer = ipRange.Length - 1
-            RemoteIP = ipRange(le)
-          Else
-            RemoteIP = HttpContext.Current.Request.ServerVariables("REMOTE_ADDR")
-          End If
-          Head &= "REMOTE_ADDR: " & RemoteIP
-          Try
-            xMailID = HttpContext.Current.Request.QueryString("MailID")
-            xLinkID = HttpContext.Current.Request.QueryString("LinkID")
-          Catch ex As Exception
+    '      'Check Request Variables
+    '      Dim Prop As String = ""
+    '      Dim Head As String = ""
+    '      Dim xMailID As String = 0
+    '      Dim xLinkID As String = 0
+    '      For Each pi As System.Reflection.PropertyInfo In HttpContext.Current.Request.GetType.GetProperties
+    '        If pi.MemberType = Reflection.MemberTypes.Property Then
+    '          Try
+    '            Prop &= "<br/> " & pi.Name & " : " & pi.GetValue(HttpContext.Current.Request, Nothing)
+    '          Catch ex As Exception
+    '          End Try
+    '        End If
+    '      Next
+    '      For I As Integer = 0 To HttpContext.Current.Request.Headers.Count - 1
+    '        head &= "<br/> " & HttpContext.Current.Request.Headers.Keys(I) & " : " & HttpContext.Current.Request.Headers.Item(I)
+    '      Next
+    '      Dim RemoteIP As String = ""
+    '      Dim ip As String = String.Empty
+    '      ip = HttpContext.Current.Request.ServerVariables("HTTP_X_FORWARDED_FOR")
+    '      If Not String.IsNullOrEmpty(ip) Then
+    '        Dim ipRange As String() = ip.Split(","c)
+    '        Dim le As Integer = ipRange.Length - 1
+    '        RemoteIP = ipRange(le)
+    '      Else
+    '        RemoteIP = HttpContext.Current.Request.ServerVariables("REMOTE_ADDR")
+    '      End If
+    '      Head &= "REMOTE_ADDR: " & RemoteIP
+    '      Try
+    '        xMailID = HttpContext.Current.Request.QueryString("MailID")
+    '        xLinkID = HttpContext.Current.Request.QueryString("LinkID")
+    '      Catch ex As Exception
 
-          End Try
+    '      End Try
 
-          Dim mSql As String = " INSERT QCM_Log "
-          mSql &= " ("
-          mSql &= " UserID,"
-          mSql &= " Action,"
-          mSql &= " RequestID,"
-          mSql &= " LoggedOn,"
-          mSql &= " RequestProp,"
-          mSql &= " RequestHeader,"
-          mSql &= " MailSrNo,"
-          mSql &= " LinkSrNo"
-          mSql &= " )"
-          mSql &= " VALUES ("
-          mSql &= "'" & EmpID & "',"
-          mSql &= "'refresh',"
-          mSql &= 0 & ",GetDate()"
-          mSql &= ",'In response from Server" & prop & "',"
-          mSql &= "'" & head & "',"
-          mSql &= mMailID & ","
-          mSql &= xLinkID
-          mSql &= ")"
-          Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
-            Using Cmd As SqlCommand = Con.CreateCommand()
-              Cmd.CommandType = CommandType.Text
-              Cmd.CommandText = mSql
-              Con.Open()
-              Cmd.ExecuteNonQuery()
-            End Using
-          End Using
-        Catch ex As Exception
-          mRet = ex.Message
-        End Try
-      End If
-      Return mRet
-    End Function
-    Public Shared Function GetLastInspection(RequestID As Integer) As SIS.QCM.qcmInspections
+    '      Dim mSql As String = " INSERT QCM_Log "
+    '      mSql &= " ("
+    '      mSql &= " UserID,"
+    '      mSql &= " Action,"
+    '      mSql &= " RequestID,"
+    '      mSql &= " LoggedOn,"
+    '      mSql &= " RequestProp,"
+    '      mSql &= " RequestHeader,"
+    '      mSql &= " MailSrNo,"
+    '      mSql &= " LinkSrNo"
+    '      mSql &= " )"
+    '      mSql &= " VALUES ("
+    '      mSql &= "'" & EmpID & "',"
+    '      mSql &= "'refresh',"
+    '      mSql &= 0 & ",GetDate()"
+    '      mSql &= ",'In response from Server" & prop & "',"
+    '      mSql &= "'" & head & "',"
+    '      mSql &= mMailID & ","
+    '      mSql &= xLinkID
+    '      mSql &= ")"
+    '      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+    '        Using Cmd As SqlCommand = Con.CreateCommand()
+    '          Cmd.CommandType = CommandType.Text
+    '          Cmd.CommandText = mSql
+    '          Con.Open()
+    '          Cmd.ExecuteNonQuery()
+    '        End Using
+    '      End Using
+    '    Catch ex As Exception
+    '      mRet = ex.Message
+    '    End Try
+    '  End If
+    '  Return mRet
+    'End Function
+    Public Shared Function GetLastInspection(RequestID As Integer, comp As String) As SIS.QCM.qcmInspections
       Dim mRet As SIS.QCM.qcmInspections = Nothing
       Dim InspectionID As String = ""
       Dim Sql As String = ""
@@ -739,7 +738,7 @@ Namespace SIS.QCM
       Sql &= "       (SELECT MAX(InspectionID) AS Expr1 "
       Sql &= "        FROM QCM_Inspections AS QCM_Inspections_1 "
       Sql &= "        WHERE        (RequestID = " & RequestID & "))) "
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString(comp))
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.Text
           Cmd.CommandText = Sql
@@ -747,16 +746,16 @@ Namespace SIS.QCM
           InspectionID = Cmd.ExecuteScalar
         End Using
       End Using
-      mRet = SIS.QCM.qcmInspections.qcmInspectionsGetByID(RequestID, InspectionID)
+      mRet = SIS.QCM.qcmInspections.qcmInspectionsGetByIDComp(RequestID, InspectionID, comp)
       Return mRet
     End Function
-    Public Shared Function SendClosedEMail(ByVal RecordID As Integer) As String
-      Dim mMailID As String = SIS.SYS.Utilities.ApplicationSpacific.NextMailNo
+    Public Shared Function SendClosedEMail(ByVal RecordID As Integer, Comp As String) As String
+      'Dim mMailID As String = SIS.SYS.Utilities.ApplicationSpacific.NextMailNo
       Dim mRet As String = ""
       Dim ToEMailID As String = ""
       Dim FromEMailID As String = ""
-      Dim Record As SIS.QCM.qcmRequestAllotment = SIS.QCM.qcmRequestAllotment.qcmRequestAllotmentGetByID(RecordID)
-      Dim Inspection As SIS.QCM.qcmInspections = GetLastInspection(RecordID)
+      Dim Record As SIS.QCM.qcmRequestAllotment = SIS.QCM.qcmRequestAllotment.qcmRequestAllotmentGetByID(RecordID, Comp)
+      Dim Inspection As SIS.QCM.qcmInspections = GetLastInspection(RecordID, Comp)
       ToEMailID = Record.FK_QCM_Requests_Createdby.EMailID
       FromEMailID = Record.FK_QCM_Requests_AllotedTo.EMailID
       If ToEMailID <> String.Empty And FromEMailID <> String.Empty Then
@@ -863,7 +862,7 @@ Namespace SIS.QCM
               mRet = ex.Message
             End Try
           End With
-          oMsg.Body &= "<br/>Mail-ID: " & mMailID
+          'oMsg.Body &= "<br/>Mail-ID: " & mMailID
           If SIS.SYS.Utilities.ApplicationSpacific.IsTesting Then
             oMsg.CC.Clear()
             oMsg.To.Clear()
@@ -972,7 +971,7 @@ Namespace SIS.QCM
               mRet = ex.Message
             End Try
           End With
-          oMsg.Body &= "<br/>Mail-ID: " & mMailID
+          'oMsg.Body &= "<br/>Mail-ID: " & mMailID
           If SIS.SYS.Utilities.ApplicationSpacific.IsTesting Then
             oMsg.CC.Clear()
             oMsg.To.Clear()
@@ -1037,13 +1036,14 @@ Namespace SIS.QCM
               .AppendLine("<td>" & Record.RequestID & "</td></tr>")
               .AppendLine("<tr><td bgcolor=""lightgray""><b>Requested By</b></td>")
               Try
-                '.AppendLine("<td>" & Record.FK_QCM_Requests_ReceivedBy.EmployeeName & "</td></tr>")
                 .AppendLine("<td>" & Record.FK_QCM_Requests_Createdby.EmployeeName & "</td></tr>")
               Catch ex As Exception
                 .AppendLine("<td></td></tr>")
               End Try
               .AppendLine("</table>")
-              .Append(GetPendigRequestHTML(Record.AllotedTo, mMailID))
+              'Pendig Call List From E-Mail is stopped
+              '.Append(GetPendigRequestHTML(Record.AllotedTo, mMailID))
+              '--------------------------
             End With
             Try
               Dim Header As String = ""
@@ -1082,7 +1082,7 @@ Namespace SIS.QCM
               mRet = ex.Message
             End Try
           End With
-          oMsg.Body &= "<br/>Mail-ID: " & mMailID
+          'oMsg.Body &= "<br/>Mail-ID: " & mMailID
           If SIS.SYS.Utilities.ApplicationSpacific.IsTesting Then
             oMsg.CC.Clear()
             oMsg.To.Clear()
@@ -1092,34 +1092,35 @@ Namespace SIS.QCM
             oMsg.Bcc.Add(New MailAddress("qcmlog@isgec.co.in", "Quality Log"))
           End If
           oClient.Send(oMsg)
-          Dim mSql As String = " INSERT QCM_Log "
-          mSql &= " ("
-          mSql &= " UserID,"
-          mSql &= " Action,"
-          mSql &= " RequestID,"
-          mSql &= " LoggedOn,"
-          mSql &= " RequestProp,"
-          mSql &= " RequestHeader,"
-          mSql &= " MailSrNo,"
-          mSql &= " LinkSrNo"
-          mSql &= " )"
-          mSql &= " VALUES ("
-          mSql &= "'" & Record.AllotedTo & "',"
-          mSql &= "'ALLOTED',"
-          mSql &= Record.RequestID & ",GetDate()"
-          mSql &= ",'Alloted By: " & Record.AllotedBy & " => at : " & oMsg.To(0).Address & "',"
-          mSql &= "'',"
-          mSql &= mMailID & ","
-          mSql &= 0
-          mSql &= ")"
-          Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
-            Using Cmd As SqlCommand = Con.CreateCommand()
-              Cmd.CommandType = CommandType.Text
-              Cmd.CommandText = mSql
-              Con.Open()
-              Cmd.ExecuteNonQuery()
-            End Using
-          End Using
+          'QcmLog is closed
+          'Dim mSql As String = " INSERT QCM_Log "
+          'mSql &= " ("
+          'mSql &= " UserID,"
+          'mSql &= " Action,"
+          'mSql &= " RequestID,"
+          'mSql &= " LoggedOn,"
+          'mSql &= " RequestProp,"
+          'mSql &= " RequestHeader,"
+          'mSql &= " MailSrNo,"
+          'mSql &= " LinkSrNo"
+          'mSql &= " )"
+          'mSql &= " VALUES ("
+          'mSql &= "'" & Record.AllotedTo & "',"
+          'mSql &= "'ALLOTED',"
+          'mSql &= Record.RequestID & ",GetDate()"
+          'mSql &= ",'Alloted By: " & Record.AllotedBy & " => at : " & oMsg.To(0).Address & "',"
+          'mSql &= "'',"
+          'mSql &= mMailID & ","
+          'mSql &= 0
+          'mSql &= ")"
+          'Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+          '  Using Cmd As SqlCommand = Con.CreateCommand()
+          '    Cmd.CommandType = CommandType.Text
+          '    Cmd.CommandText = mSql
+          '    Con.Open()
+          '    Cmd.ExecuteNonQuery()
+          '  End Using
+          'End Using
         Catch ex As Exception
           mRet = ex.Message
         End Try
@@ -1222,7 +1223,7 @@ Namespace SIS.QCM
               mRet = ex.Message
             End Try
           End With
-          oMsg.Body &= "<br/>Mail-ID: " & mMailID
+          'oMsg.Body &= "<br/>Mail-ID: " & mMailID
           If SIS.SYS.Utilities.ApplicationSpacific.IsTesting Then
             oMsg.CC.Clear()
             oMsg.To.Clear()
@@ -1232,34 +1233,34 @@ Namespace SIS.QCM
             oMsg.Bcc.Add(New MailAddress("qcmlog@isgec.co.in", "Quality Log"))
           End If
           oClient.Send(oMsg)
-          Dim mSql As String = " INSERT QCM_Log "
-          mSql &= " ("
-          mSql &= " UserID,"
-          mSql &= " Action,"
-          mSql &= " RequestID,"
-          mSql &= " LoggedOn,"
-          mSql &= " RequestProp,"
-          mSql &= " RequestHeader,"
-          mSql &= " MailSrNo,"
-          mSql &= " LinkSrNo"
-          mSql &= " )"
-          mSql &= " VALUES ("
-          mSql &= "'" & Record.AllotedTo & "',"
-          mSql &= "'Notif',"
-          mSql &= Record.RequestID & ",GetDate()"
-          mSql &= ",'After Allotment',"
-          mSql &= "'',"
-          mSql &= mMailID & ","
-          mSql &= 0
-          mSql &= ")"
-          Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
-            Using Cmd As SqlCommand = Con.CreateCommand()
-              Cmd.CommandType = CommandType.Text
-              Cmd.CommandText = mSql
-              Con.Open()
-              Cmd.ExecuteNonQuery()
-            End Using
-          End Using
+          'Dim mSql As String = " INSERT QCM_Log "
+          'mSql &= " ("
+          'mSql &= " UserID,"
+          'mSql &= " Action,"
+          'mSql &= " RequestID,"
+          'mSql &= " LoggedOn,"
+          'mSql &= " RequestProp,"
+          'mSql &= " RequestHeader,"
+          'mSql &= " MailSrNo,"
+          'mSql &= " LinkSrNo"
+          'mSql &= " )"
+          'mSql &= " VALUES ("
+          'mSql &= "'" & Record.AllotedTo & "',"
+          'mSql &= "'Notif',"
+          'mSql &= Record.RequestID & ",GetDate()"
+          'mSql &= ",'After Allotment',"
+          'mSql &= "'',"
+          'mSql &= mMailID & ","
+          'mSql &= 0
+          'mSql &= ")"
+          'Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+          '  Using Cmd As SqlCommand = Con.CreateCommand()
+          '    Cmd.CommandType = CommandType.Text
+          '    Cmd.CommandText = mSql
+          '    Con.Open()
+          '    Cmd.ExecuteNonQuery()
+          '  End Using
+          'End Using
         Catch ex As Exception
           mRet = ex.Message
         End Try
@@ -1365,7 +1366,7 @@ Namespace SIS.QCM
               mRet = ex.Message
             End Try
           End With
-          oMsg.Body &= "<br/>Mail-ID: " & mMailID
+          'oMsg.Body &= "<br/>Mail-ID: " & mMailID
           If SIS.SYS.Utilities.ApplicationSpacific.IsTesting Then
             oMsg.CC.Clear()
             oMsg.To.Clear()
@@ -1381,18 +1382,18 @@ Namespace SIS.QCM
       End If
       Return mRet
     End Function
-    Public Shared Function GetSMSData(ByVal RequestID As Integer) As String
-      Dim Record As SIS.QCM.qcmRequestAllotment = SIS.QCM.qcmRequestAllotment.qcmRequestAllotmentGetByID(RequestID)
-      Dim mRet As String = ""
-      mRet = Record.FK_QCM_Requests_AllotedTo.UserFullName
-      mRet = mRet & ", You are requested to attend the inspection call. Project: " & Record.IDM_Projects6_Description
-      mRet = mRet & " Supplier: " & Record.IDM_Vendors7_Description
-      mRet = mRet & " Place: " & Record.CreationRemarks
-      mRet = mRet & " QTY.: " & Record.TotalRequestedQuantity
-      mRet = mRet & IIf(Record.AllotedStartDate = Record.AllotedFinishDate, " On Date: " & Record.AllotedStartDate, "From Dt.: " & Record.AllotedStartDate & " To: " & Record.AllotedFinishDate)
-      mRet = mRet & " Details: " & Record.Description
-      mRet = "http://192.9.200.172:8080/xampp/web2sms.php?toaddress=" & "|" & Record.FK_QCM_Requests_AllotedTo.MobileNo & "|" & SIS.QCM.qcmEmployees.qcmEmployeesGetByID(Record.CreatedBy).ContactNumbers & "|" & mRet
-      Return mRet
-    End Function
+    'Public Shared Function GetSMSData(ByVal RequestID As Integer) As String
+    '  Dim Record As SIS.QCM.qcmRequestAllotment = SIS.QCM.qcmRequestAllotment.qcmRequestAllotmentGetByID(RequestID)
+    '  Dim mRet As String = ""
+    '  mRet = Record.FK_QCM_Requests_AllotedTo.UserFullName
+    '  mRet = mRet & ", You are requested to attend the inspection call. Project: " & Record.IDM_Projects6_Description
+    '  mRet = mRet & " Supplier: " & Record.IDM_Vendors7_Description
+    '  mRet = mRet & " Place: " & Record.CreationRemarks
+    '  mRet = mRet & " QTY.: " & Record.TotalRequestedQuantity
+    '  mRet = mRet & IIf(Record.AllotedStartDate = Record.AllotedFinishDate, " On Date: " & Record.AllotedStartDate, "From Dt.: " & Record.AllotedStartDate & " To: " & Record.AllotedFinishDate)
+    '  mRet = mRet & " Details: " & Record.Description
+    '  mRet = "http://192.9.200.172:8080/xampp/web2sms.php?toaddress=" & "|" & Record.FK_QCM_Requests_AllotedTo.MobileNo & "|" & SIS.QCM.qcmEmployees.qcmEmployeesGetByID(Record.CreatedBy).ContactNumbers & "|" & mRet
+    '  Return mRet
+    'End Function
   End Class
 End Namespace

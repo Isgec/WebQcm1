@@ -17,7 +17,8 @@ Namespace SIS.QCM
 			Dim mRet As Boolean = True
 			Return mRet
 		End Function
-    Public Shared Function GetProjectFromERP(ByVal ProjectID As String, Optional ByVal mComp As String = "200") As SIS.QCM.qcmProjects
+    Public Shared Function GetProjectFromERP(ByVal ProjectID As String, ByVal mComp As String) As SIS.QCM.qcmProjects
+      If mComp = "" Then mComp = HttpContext.Current.Session("FinanceCompany")
       Dim Ret As SIS.QCM.qcmProjects = Nothing
       Dim Sql As String = ""
       Sql &= "select top 1  "
@@ -45,7 +46,7 @@ Namespace SIS.QCM
       End If
       Return Ret
     End Function
-    Public Shared Function InsertData(ByVal Record As SIS.QCM.qcmProjects, Optional ByVal mComp As String = "200") As String
+    Public Shared Function InsertData(ByVal Record As SIS.QCM.qcmProjects, ByVal mComp As String) As String
       Dim _Result As String = Record.ProjectID
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
         Dim Sql As String = ""

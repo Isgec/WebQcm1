@@ -136,39 +136,39 @@ Namespace SIS.QCM
     <DataObjectMethod(DataObjectMethodType.Select)> _
     Public Shared Function qcmEmployeeGroupUsersGetByID(ByVal GroupiD As Int32, ByVal CardNo As String) As SIS.QCM.qcmEmployeeGroupUsers
       Dim Results As SIS.QCM.qcmEmployeeGroupUsers = Nothing
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spqcmEmployeeGroupUsersSelectByID"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@GroupiD",SqlDbType.Int,GroupiD.ToString.Length, GroupiD)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@CardNo",SqlDbType.NVarChar,CardNo.ToString.Length, CardNo)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NvarChar, 9, HttpContext.Current.Session("LoginID"))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@GroupiD", SqlDbType.Int, GroupiD.ToString.Length, GroupiD)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@CardNo", SqlDbType.NVarChar, CardNo.ToString.Length, CardNo)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
           Con.Open()
           Dim Reader As SqlDataReader = Cmd.ExecuteReader()
-					If Reader.Read() Then
-						Results = New SIS.QCM.qcmEmployeeGroupUsers(Reader)
-					End If
-					Reader.Close()
+          If Reader.Read() Then
+            Results = New SIS.QCM.qcmEmployeeGroupUsers(Reader)
+          End If
+          Reader.Close()
         End Using
       End Using
       Return Results
     End Function
-    <DataObjectMethod(DataObjectMethodType.Select)> _
+    <DataObjectMethod(DataObjectMethodType.Select)>
     Public Shared Function qcmEmployeeGroupUsersSelectList(ByVal StartRowIndex As Integer, ByVal MaximumRows As Integer, ByVal OrderBy As String, ByVal SearchState As Boolean, ByVal SearchText As String, ByVal GroupiD As Int32) As List(Of SIS.QCM.qcmEmployeeGroupUsers)
       Dim Results As List(Of SIS.QCM.qcmEmployeeGroupUsers) = Nothing
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
-					If SearchState Then
-						Cmd.CommandText = "spqcmEmployeeGroupUsersSelectListSearch"
-						SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@KeyWord", SqlDbType.NVarChar, 250, SearchText)
-					Else
-						Cmd.CommandText = "spqcmEmployeeGroupUsersSelectListFilteres"
-						SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Filter_GroupiD",SqlDbType.Int,10, IIf(GroupiD = Nothing, 0,GroupiD))
-					End If
+          If SearchState Then
+            Cmd.CommandText = "spqcmEmployeeGroupUsersSelectListSearch"
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@KeyWord", SqlDbType.NVarChar, 250, SearchText)
+          Else
+            Cmd.CommandText = "spqcmEmployeeGroupUsersSelectListFilteres"
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Filter_GroupiD", SqlDbType.Int, 10, IIf(GroupiD = Nothing, 0, GroupiD))
+          End If
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@StartRowIndex", SqlDbType.Int, -1, StartRowIndex)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@MaximumRows", SqlDbType.Int, -1, MaximumRows)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NvarChar, 9, HttpContext.Current.Session("LoginID"))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OrderBy", SqlDbType.NVarChar, 50, OrderBy)
           Cmd.Parameters.Add("@RecordCount", SqlDbType.Int)
           Cmd.Parameters("@RecordCount").Direction = ParameterDirection.Output
@@ -188,12 +188,12 @@ Namespace SIS.QCM
     Public Shared Function qcmEmployeeGroupUsersSelectCount(ByVal SearchState As Boolean, ByVal SearchText As String, ByVal GroupiD As Int32) As Integer
       Return _RecordCount
     End Function
-      'Select By ID One Record Filtered Overloaded GetByID
-    <DataObjectMethod(DataObjectMethodType.Select)> _
+    'Select By ID One Record Filtered Overloaded GetByID
+    <DataObjectMethod(DataObjectMethodType.Select)>
     Public Shared Function qcmEmployeeGroupUsersGetByID(ByVal GroupiD As Int32, ByVal CardNo As String, ByVal Filter_GroupiD As Int32) As SIS.QCM.qcmEmployeeGroupUsers
       Return qcmEmployeeGroupUsersGetByID(GroupiD, CardNo)
     End Function
-    <DataObjectMethod(DataObjectMethodType.Insert, True)> _
+    <DataObjectMethod(DataObjectMethodType.Insert, True)>
     Public Shared Function qcmEmployeeGroupUsersInsert(ByVal Record As SIS.QCM.qcmEmployeeGroupUsers) As SIS.QCM.qcmEmployeeGroupUsers
       Dim _Rec As SIS.QCM.qcmEmployeeGroupUsers = SIS.QCM.qcmEmployeeGroupUsers.qcmEmployeeGroupUsersGetNewRecord()
       With _Rec
@@ -203,12 +203,12 @@ Namespace SIS.QCM
       Return SIS.QCM.qcmEmployeeGroupUsers.InsertData(_Rec)
     End Function
     Public Shared Function InsertData(ByVal Record As SIS.QCM.qcmEmployeeGroupUsers) As SIS.QCM.qcmEmployeeGroupUsers
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spqcmEmployeeGroupUsersInsert"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@GroupiD",SqlDbType.Int,11, Record.GroupiD)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@CardNo",SqlDbType.NVarChar,9, Record.CardNo)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@GroupiD", SqlDbType.Int, 11, Record.GroupiD)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@CardNo", SqlDbType.NVarChar, 9, Record.CardNo)
           Cmd.Parameters.Add("@Return_GroupiD", SqlDbType.Int, 11)
           Cmd.Parameters("@Return_GroupiD").Direction = ParameterDirection.Output
           Cmd.Parameters.Add("@Return_CardNo", SqlDbType.NVarChar, 9)
@@ -221,7 +221,7 @@ Namespace SIS.QCM
       End Using
       Return Record
     End Function
-    <DataObjectMethod(DataObjectMethodType.Update, True)> _
+    <DataObjectMethod(DataObjectMethodType.Update, True)>
     Public Shared Function qcmEmployeeGroupUsersUpdate(ByVal Record As SIS.QCM.qcmEmployeeGroupUsers) As SIS.QCM.qcmEmployeeGroupUsers
       Dim _Rec As SIS.QCM.qcmEmployeeGroupUsers = SIS.QCM.qcmEmployeeGroupUsers.qcmEmployeeGroupUsersGetByID(Record.GroupiD, Record.CardNo)
       With _Rec
@@ -229,14 +229,14 @@ Namespace SIS.QCM
       Return SIS.QCM.qcmEmployeeGroupUsers.UpdateData(_Rec)
     End Function
     Public Shared Function UpdateData(ByVal Record As SIS.QCM.qcmEmployeeGroupUsers) As SIS.QCM.qcmEmployeeGroupUsers
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spqcmEmployeeGroupUsersUpdate"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Original_GroupiD",SqlDbType.Int,11, Record.GroupiD)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Original_CardNo",SqlDbType.NVarChar,9, Record.CardNo)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@GroupiD",SqlDbType.Int,11, Record.GroupiD)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@CardNo",SqlDbType.NVarChar,9, Record.CardNo)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Original_GroupiD", SqlDbType.Int, 11, Record.GroupiD)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Original_CardNo", SqlDbType.NVarChar, 9, Record.CardNo)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@GroupiD", SqlDbType.Int, 11, Record.GroupiD)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@CardNo", SqlDbType.NVarChar, 9, Record.CardNo)
           Cmd.Parameters.Add("@RowCount", SqlDbType.Int)
           Cmd.Parameters("@RowCount").Direction = ParameterDirection.Output
           _RecordCount = -1
@@ -247,24 +247,24 @@ Namespace SIS.QCM
       End Using
       Return Record
     End Function
-		<DataObjectMethod(DataObjectMethodType.Delete, True)> _
-		Public Shared Function Delete(ByVal Record As SIS.QCM.qcmEmployeeGroupUsers) As Int32
-			Dim _Result As Integer = 0
-			Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
-				Using Cmd As SqlCommand = Con.CreateCommand()
-					Cmd.CommandType = CommandType.StoredProcedure
-					Cmd.CommandText = "spqcmEmployeeGroupUsersDelete"
-					SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Original_GroupiD", SqlDbType.Int, Record.GroupiD.ToString.Length, Record.GroupiD)
-					SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Original_CardNo", SqlDbType.NVarChar, Record.CardNo.ToString.Length, Record.CardNo)
-					Cmd.Parameters.Add("@RowCount", SqlDbType.Int)
-					Cmd.Parameters("@RowCount").Direction = ParameterDirection.Output
-					_RecordCount = -1
-					Con.Open()
-					Cmd.ExecuteNonQuery()
-					_RecordCount = Cmd.Parameters("@RowCount").Value
-				End Using
-			End Using
-			Return _RecordCount
+    <DataObjectMethod(DataObjectMethodType.Delete, True)>
+    Public Shared Function Delete(ByVal Record As SIS.QCM.qcmEmployeeGroupUsers) As Int32
+      Dim _Result As Integer = 0
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString())
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.StoredProcedure
+          Cmd.CommandText = "spqcmEmployeeGroupUsersDelete"
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Original_GroupiD", SqlDbType.Int, Record.GroupiD.ToString.Length, Record.GroupiD)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Original_CardNo", SqlDbType.NVarChar, Record.CardNo.ToString.Length, Record.CardNo)
+          Cmd.Parameters.Add("@RowCount", SqlDbType.Int)
+          Cmd.Parameters("@RowCount").Direction = ParameterDirection.Output
+          _RecordCount = -1
+          Con.Open()
+          Cmd.ExecuteNonQuery()
+          _RecordCount = Cmd.Parameters("@RowCount").Value
+        End Using
+      End Using
+      Return _RecordCount
 		End Function
     Public Sub New(ByVal Reader As SqlDataReader)
       On Error Resume Next

@@ -17,10 +17,7 @@ Namespace SIS.ERP
     Public Property POWeight As String = "0.0000"
     Public Shared Function ERPPoGetByID(ByVal PONumber As String) As SIS.ERP.ERPPo
       Dim mSql As String = ""
-      Dim mComp As String = "200"
-      If PONumber.StartsWith("P701") Then
-        mComp = "700"
-      End If
+      Dim mComp As String = HttpContext.Current.Session("FinanceCompany")
       mSql = mSql & "select distinct "
       mSql = mSql & "ordh.t_orno as ERPPoNumber,"
       mSql = mSql & "(select top 1 t_cprj from ttdpur401" & mComp & " where t_orno=ordh.t_orno) as ProjectID,"
@@ -51,11 +48,8 @@ Namespace SIS.ERP
       End Using
       If Results IsNot Nothing Then
         If Results.BuyerID.Length < 4 Then Results.BuyerID = Results.BuyerID.PadLeft(4, "0")
-        Dim tmpSupplierID As String = Results.SupplierID
-        'If mComp <> "200" Then Results.SupplierID = "S" & mComp & Right(Results.SupplierID, 5)
-        If mComp <> "200" Then Results.SupplierID = "" & mComp & Right(Results.SupplierID, 6)
         Dim oVar As SIS.QCM.qcmVendors = SIS.QCM.qcmVendors.qcmVendorsGetByID(Results.SupplierID)
-        If oVar Is Nothing Then oVar = SIS.QCM.qcmVendors.GetBPFromERP(tmpSupplierID, mComp)
+        If oVar Is Nothing Then oVar = SIS.QCM.qcmVendors.GetBPFromERP(Results.SupplierID, mComp)
         Results.SupplierAddress = oVar.Address1.Trim & " " & oVar.Address2 & " " & oVar.Address3 & " " & oVar.Address4
         Dim oPVar As SIS.QCM.qcmProjects = SIS.QCM.qcmProjects.qcmProjectsGetByID(Results.ProjectID)
         If oPVar Is Nothing Then oPVar = SIS.QCM.qcmProjects.GetProjectFromERP(Results.ProjectID, mComp)

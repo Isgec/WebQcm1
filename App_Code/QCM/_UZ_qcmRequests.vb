@@ -74,14 +74,17 @@ Namespace SIS.QCM
     End Function
     Public Shared Function OtherStartedCall(ByVal InspectedBy As String, ByVal RequestID As Int32) As Integer
       Dim Results As Integer = 0
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
-        Using Cmd As SqlCommand = Con.CreateCommand()
-          Cmd.CommandType = CommandType.Text
-          Cmd.CommandText = "select top 1 isnull(requestid,0) as req from qcm_requests where allotedto='" & InspectedBy & "' and AllotedStartDate>=convert(datetime,'01/12/2018',103) and requeststateid='INSPECTED' and paused=0 and requestid<>" & RequestID
-          Con.Open()
-          Results = Cmd.ExecuteScalar
+      Dim aComp() As String = {"700", "651", "200"}
+      For Each cmp As String In aComp
+        Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString(cmp))
+          Using Cmd As SqlCommand = Con.CreateCommand()
+            Cmd.CommandType = CommandType.Text
+            Cmd.CommandText = "select top 1 isnull(requestid,0) as req from qcm_requests where allotedto='" & InspectedBy & "' and AllotedStartDate>=convert(datetime,'01/12/2018',103) and requeststateid='INSPECTED' and paused=0 and requestid<>" & RequestID
+            Con.Open()
+            Results += Cmd.ExecuteScalar
+          End Using
         End Using
-      End Using
+      Next
       Return Results
     End Function
 
@@ -315,6 +318,24 @@ Namespace SIS.QCM
       End Try
       Return True
     End Function
+    Public Shared Function UpdateInspected(ByVal oIns As SIS.QCM.qcmInspections, comp As String) As Boolean
+      Try
+        Dim oReq As SIS.QCM.qcmRequests = SIS.QCM.qcmRequests.qcmRequestsGetByID(oIns.RequestID, comp)
+        If oReq.InspectionStartDate = String.Empty Then
+          oReq.InspectionStartDate = oIns.InspectedOn
+          oReq.RequestStateID = "INSPECTED"
+          SIS.QCM.qcmRequests.UpdateData(oReq)
+        ElseIf Convert.ToDateTime(oReq.InspectionStartDate) > Convert.ToDateTime(oIns.InspectedOn) Then
+          oReq.InspectionStartDate = oIns.InspectedOn
+          oReq.RequestStateID = "INSPECTED"
+          SIS.QCM.qcmRequests.UpdateData(oReq, comp)
+        End If
+      Catch ex As Exception
+        Return False
+      End Try
+      Return True
+    End Function
+
     Public Shared Function CloseInspectionRequest(ByVal RequestID As Integer, ByVal InspectionStatusID As Integer) As Boolean
       Try
         Dim oReq As SIS.QCM.qcmRequests = SIS.QCM.qcmRequests.qcmRequestsGetByID(RequestID)
@@ -347,55 +368,59 @@ Namespace SIS.QCM
     End Function
     Public Shared Function GetAllotedToByCreatedByForMonthYear(ByVal ForDate As DateTime) As List(Of SIS.QCM.qcmRequests)
       Dim Results As List(Of SIS.QCM.qcmRequests) = Nothing
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
-        Using Cmd As SqlCommand = Con.CreateCommand()
-          Dim ForMonth As Integer = ForDate.Month
-          Dim ForYear As Integer = ForDate.Year
-          Cmd.CommandType = CommandType.StoredProcedure
-          Cmd.CommandText = "spqcm_LG_RequestsSelectByCreatedByMonthYear"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ForMonth", SqlDbType.Int, 10, ForMonth)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ForYear", SqlDbType.Int, 10, ForYear)
-          Cmd.Parameters.Add("@RecordCount", SqlDbType.Int)
-          Cmd.Parameters("@RecordCount").Direction = ParameterDirection.Output
-          _RecordCount = -1
-          Results = New List(Of SIS.QCM.qcmRequests)()
-          Con.Open()
-          Dim Reader As SqlDataReader = Cmd.ExecuteReader()
-          While (Reader.Read())
-            Results.Add(New SIS.QCM.qcmRequests(Reader))
-          End While
-          Reader.Close()
-          _RecordCount = Cmd.Parameters("@RecordCount").Value
+      Dim aComp() As String = {"700", "651", "200"}
+      _RecordCount = -1
+      For Each cmp As String In aComp
+        Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString(cmp))
+          Using Cmd As SqlCommand = Con.CreateCommand()
+            Dim ForMonth As Integer = ForDate.Month
+            Dim ForYear As Integer = ForDate.Year
+            Cmd.CommandType = CommandType.StoredProcedure
+            Cmd.CommandText = "spqcm_LG_RequestsSelectByCreatedByMonthYear"
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ForMonth", SqlDbType.Int, 10, ForMonth)
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ForYear", SqlDbType.Int, 10, ForYear)
+            Cmd.Parameters.Add("@RecordCount", SqlDbType.Int)
+            Cmd.Parameters("@RecordCount").Direction = ParameterDirection.Output
+            Con.Open()
+            Dim Reader As SqlDataReader = Cmd.ExecuteReader()
+            While (Reader.Read())
+              Results.Add(New SIS.QCM.qcmRequests(Reader))
+            End While
+            Reader.Close()
+            _RecordCount = Cmd.Parameters("@RecordCount").Value
+          End Using
         End Using
-      End Using
+      Next
       Return Results
     End Function
     Public Shared Function GetAllotedToByAllotedToForMonthYear(ByVal AllotedTo As String, ByVal ForDate As DateTime) As List(Of SIS.QCM.qcmRequests)
-      Dim Results As List(Of SIS.QCM.qcmRequests) = Nothing
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
-        Using Cmd As SqlCommand = Con.CreateCommand()
-          Dim ForMonth As Integer = ForDate.Month
-          Dim ForYear As Integer = ForDate.Year
-          Cmd.CommandType = CommandType.StoredProcedure
-          Cmd.CommandText = "spqcm_LG_RequestsSelectByAllotedToMonthYear"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@AllotedTo", SqlDbType.NVarChar, 9, AllotedTo)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ForMonth", SqlDbType.Int, 10, ForMonth)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ForYear", SqlDbType.Int, 10, ForYear)
-          Cmd.Parameters.Add("@RecordCount", SqlDbType.Int)
-          Cmd.Parameters("@RecordCount").Direction = ParameterDirection.Output
-          _RecordCount = -1
-          Results = New List(Of SIS.QCM.qcmRequests)()
-          Con.Open()
-          Dim Reader As SqlDataReader = Cmd.ExecuteReader()
-          While (Reader.Read())
-            Results.Add(New SIS.QCM.qcmRequests(Reader))
-          End While
-          Reader.Close()
-          _RecordCount = Cmd.Parameters("@RecordCount").Value
+      Dim Results As New List(Of SIS.QCM.qcmRequests)
+      Dim aComp() As String = {"700", "651", "200"}
+      _RecordCount = -1
+      For Each cmp As String In aComp
+        Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString(cmp))
+          Using Cmd As SqlCommand = Con.CreateCommand()
+            Dim ForMonth As Integer = ForDate.Month
+            Dim ForYear As Integer = ForDate.Year
+            Cmd.CommandType = CommandType.StoredProcedure
+            Cmd.CommandText = "spqcm_LG_RequestsSelectByAllotedToMonthYear"
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@AllotedTo", SqlDbType.NVarChar, 9, AllotedTo)
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ForMonth", SqlDbType.Int, 10, ForMonth)
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ForYear", SqlDbType.Int, 10, ForYear)
+            Cmd.Parameters.Add("@RecordCount", SqlDbType.Int)
+            Cmd.Parameters("@RecordCount").Direction = ParameterDirection.Output
+            Con.Open()
+            Dim Reader As SqlDataReader = Cmd.ExecuteReader()
+            While (Reader.Read())
+              Results.Add(New SIS.QCM.qcmRequests(Reader))
+            End While
+            Reader.Close()
+            _RecordCount += Cmd.Parameters("@RecordCount").Value
+          End Using
         End Using
-      End Using
+      Next
       Return Results
     End Function
     Public Shared Function GetByCreatedOn(ByVal ForDate As DateTime, ByVal OrderBy As String) As List(Of SIS.QCM.qcmRequests)

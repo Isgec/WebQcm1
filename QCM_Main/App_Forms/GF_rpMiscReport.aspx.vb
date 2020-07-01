@@ -703,19 +703,33 @@ Partial Class GF_rpMiscReport
         c = 2
         .Cells(r, c).Value = rq.RequestID
         c += 1
+        .Cells(r, c).Value = rq.ProjectID
+        c += 1
+        .Cells(r, c).Value = rq.IDM_Projects6_Description
+        c += 1
+        .Cells(r, c).Value = rq.SupplierID
+        c += 1
+        .Cells(r, c).Value = rq.IDM_Vendors7_Description
+        c += 1
+        .Cells(r, c).Value = rq.Description
+        c += 1
+        .Cells(r, c).Value = rq.OrderNo
+        c += 1
+        .Cells(r, c).Value = rq.HRM_Employees5_EmployeeName
+        c += 1
+        .Cells(r, c).Value = rq.ReceivedOn
+        c += 1
         .Cells(r, c).Value = rq.RequestedInspectionStartDate
         c += 1
-        .Cells(r, c).Value = IIf(rq.InspectionStartDate <> "", Left(rq.InspectionStartDate, 10), "")
+        .Cells(r, c).Value = rq.InspectionFinishDate
         c += 1
-        .Cells(r, c).Value = IIf(rq.InspectionFinishDate <> "", Left(rq.InspectionFinishDate, 10), "")
-        c += 1
-        .Cells(r, c).Value = rq.QCM_Regions12_RegionName
+        .Cells(r, c).Value = Convert.ToDateTime(rq.RequestedInspectionStartDate).ToString("MMM-yy")
         c += 1
         Dim Days As Integer = 0
         If rq.InspectionStartDate <> String.Empty Then
-          Days = DateDiff(DateInterval.Day, Convert.ToDateTime(rq.RequestedInspectionStartDate), Convert.ToDateTime(Left(rq.InspectionStartDate, 10)))
+          Days = DateDiff(DateInterval.Day, Convert.ToDateTime(rq.RequestedInspectionStartDate), Convert.ToDateTime(rq.InspectionStartDate))
         Else
-          Days = DateDiff(DateInterval.Day, Convert.ToDateTime(rq.RequestedInspectionStartDate), Convert.ToDateTime(oRec.TReqDt))
+          Days = DateDiff(DateInterval.Day, Convert.ToDateTime(rq.RequestedInspectionStartDate), Now)
         End If
         If Days <= 0 Then
           .Cells(r, c).Value = "    On Time"
@@ -727,13 +741,20 @@ Partial Class GF_rpMiscReport
           .Cells(r, c).Value = "More than 4 days"
         End If
         c += 1
+        .Cells(r, c).Value = rq.HRM_Employees3_EmployeeName
+        c += 1
+        .Cells(r, c).Value = rq.AllotedOn
+        c += 1
+        .Cells(r, c).Value = rq.QCM_Regions12_RegionName
+        c += 1
+        .Cells(r, c).Value = rq.HRM_Employees2_EmployeeName
+        c += 1
+        .Cells(r, c).Value = rq.InspectionStartDate
+        c += 1
+
+
+
         .Cells(r, c).Value = IIf(rq.Paused, "YES", "NO")
-        c += 1
-        .Cells(r, c).Value = rq.ProjectID
-        c += 1
-        .Cells(r, c).Value = rq.IDM_Projects6_Description
-        c += 1
-        .Cells(r, c).Value = rq.IDM_Vendors7_Description
         c += 1
         r += 1
       Next

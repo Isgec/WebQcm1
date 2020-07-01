@@ -17,7 +17,8 @@ Namespace SIS.QCM
 			Dim mRet As Boolean = True
 			Return mRet
 		End Function
-    Public Shared Function GetBPFromERP(ByVal BPID As String, Optional ByVal mComp As String = "200") As SIS.QCM.qcmVendors
+    Public Shared Function GetBPFromERP(ByVal BPID As String, ByVal mComp As String) As SIS.QCM.qcmVendors
+      If mComp = "" Then mComp = HttpContext.Current.Session("FinanceCompany")
       Dim Results As SIS.QCM.qcmVendors = Nothing
       Dim Sql As String = ""
       Sql &= "select                                                           "
@@ -51,8 +52,6 @@ Namespace SIS.QCM
         End Using
       End Using
       If Results IsNot Nothing Then
-        'If mComp <> "200" Then Results.VendorID = "S" & mComp & Right(Results.VendorID, 5)
-        If mComp <> "200" Then Results.VendorID = "" & mComp & Right(Results.VendorID, 6)
         Results = SIS.QCM.qcmVendors.InsertData(Results)
       End If
       Return Results

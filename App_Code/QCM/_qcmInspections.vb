@@ -45,6 +45,7 @@ Namespace SIS.QCM
     Private _FK_QCM_Inspections_RequestStateID As SIS.QCM.qcmRequestStates = Nothing
     Private _FK_QCM_Inspections_EnteredBy As SIS.QCM.qcmUsers = Nothing
     Private _FK_QCM_Inspections_RequestID As SIS.QCM.qcmRequests = Nothing
+    Public Property Company As String = ""
     Public Property InspectedQuantityFinal() As String
       Get
         Return _InspectedQuantityFinal
@@ -495,35 +496,58 @@ Namespace SIS.QCM
     Public Shared Function qcmInspectionsGetNewRecord() As SIS.QCM.qcmInspections
       Return New SIS.QCM.qcmInspections()
     End Function
-    <DataObjectMethod(DataObjectMethodType.Select)> _
+    <DataObjectMethod(DataObjectMethodType.Select)>
     Public Shared Function qcmInspectionsGetByID(ByVal RequestID As Int32, ByVal InspectionID As Int32) As SIS.QCM.qcmInspections
       Dim Results As SIS.QCM.qcmInspections = Nothing
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spqcmInspectionsSelectByID"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RequestID",SqlDbType.Int,RequestID.ToString.Length, RequestID)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectionID",SqlDbType.Int,InspectionID.ToString.Length, InspectionID)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NvarChar, 9, HttpContext.Current.Session("LoginID"))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RequestID", SqlDbType.Int, RequestID.ToString.Length, RequestID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectionID", SqlDbType.Int, InspectionID.ToString.Length, InspectionID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
           Con.Open()
           Dim Reader As SqlDataReader = Cmd.ExecuteReader()
-					If Reader.Read() Then
-						Results = New SIS.QCM.qcmInspections(Reader)
-					End If
-					Reader.Close()
+          If Reader.Read() Then
+            Results = New SIS.QCM.qcmInspections(Reader)
+          End If
+          Reader.Close()
         End Using
       End Using
       Return Results
     End Function
-    <DataObjectMethod(DataObjectMethodType.Select)> _
-    Public Shared Function GetByRequestID(ByVal RequestID As Int32, ByVal OrderBy as String) As List(Of SIS.QCM.qcmInspections)
+    <DataObjectMethod(DataObjectMethodType.Select)>
+    Public Shared Function qcmInspectionsGetByID(ByVal RequestID As Int32, ByVal InspectionID As Int32, ByVal Filter_RequestID As Int32) As SIS.QCM.qcmInspections
+      Return qcmInspectionsGetByID(RequestID, InspectionID)
+    End Function
+    Public Shared Function qcmInspectionsGetByIDComp(ByVal RequestID As Int32, ByVal InspectionID As Int32, ByVal comp As String) As SIS.QCM.qcmInspections
+      Dim Results As SIS.QCM.qcmInspections = Nothing
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString(comp))
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.StoredProcedure
+          Cmd.CommandText = "spqcmInspectionsSelectByID"
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RequestID", SqlDbType.Int, RequestID.ToString.Length, RequestID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectionID", SqlDbType.Int, InspectionID.ToString.Length, InspectionID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
+          Con.Open()
+          Dim Reader As SqlDataReader = Cmd.ExecuteReader()
+          If Reader.Read() Then
+            Results = New SIS.QCM.qcmInspections(Reader)
+          End If
+          Reader.Close()
+        End Using
+      End Using
+      Return Results
+    End Function
+    <DataObjectMethod(DataObjectMethodType.Select)>
+    Public Shared Function GetByRequestID(ByVal RequestID As Int32, ByVal OrderBy As String) As List(Of SIS.QCM.qcmInspections)
       Dim Results As List(Of SIS.QCM.qcmInspections) = Nothing
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spqcmInspectionsSelectByRequestID"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RequestID",SqlDbType.Int,RequestID.ToString.Length, RequestID)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NvarChar, 9, HttpContext.Current.Session("LoginID"))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RequestID", SqlDbType.Int, RequestID.ToString.Length, RequestID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OrderBy", SqlDbType.NVarChar, 50, OrderBy)
           Cmd.Parameters.Add("@RecordCount", SqlDbType.Int)
           Cmd.Parameters("@RecordCount").Direction = ParameterDirection.Output
@@ -675,12 +699,8 @@ Namespace SIS.QCM
     Public Shared Function qcmInspectionsSelectCount(ByVal SearchState As Boolean, ByVal SearchText As String, ByVal RequestID As Int32) As Integer
       Return _RecordCount
     End Function
-      'Select By ID One Record Filtered Overloaded GetByID
-    <DataObjectMethod(DataObjectMethodType.Select)> _
-    Public Shared Function qcmInspectionsGetByID(ByVal RequestID As Int32, ByVal InspectionID As Int32, ByVal Filter_RequestID As Int32) As SIS.QCM.qcmInspections
-      Return qcmInspectionsGetByID(RequestID, InspectionID)
-    End Function
-    <DataObjectMethod(DataObjectMethodType.Insert, True)> _
+    'Select By ID One Record Filtered Overloaded GetByID
+    <DataObjectMethod(DataObjectMethodType.Insert, True)>
     Public Shared Function qcmInspectionsInsert(ByVal Record As SIS.QCM.qcmInspections) As SIS.QCM.qcmInspections
       Dim _Rec As SIS.QCM.qcmInspections = SIS.QCM.qcmInspections.qcmInspectionsGetNewRecord()
       With _Rec
@@ -696,7 +716,7 @@ Namespace SIS.QCM
         .InspectedOn = Record.InspectedOn
         .RequestStateID = "INSPECTED"
         .FileAttached = Record.FileAttached
-        .EnteredBy =  Global.System.Web.HttpContext.Current.Session("LoginID")
+        .EnteredBy = Global.System.Web.HttpContext.Current.Session("LoginID")
         .EnteredOn = Now
         .OfferedQuantity = Record.OfferedQuantity
         .ClearedQuantity = Record.ClearedQuantity
@@ -705,28 +725,32 @@ Namespace SIS.QCM
         .OfferedQuantityFinal = Record.OfferedQuantityFinal
         .ClearedQuantityFinal = Record.ClearedQuantityFinal
       End With
-      Return SIS.QCM.qcmInspections.InsertData(_Rec)
+      If Record.Company = "" Then
+        Return SIS.QCM.qcmInspections.InsertData(_Rec)
+      Else
+        Return SIS.QCM.qcmInspections.InsertData(_Rec, Record.Company)
+      End If
     End Function
     Public Shared Function InsertData(ByVal Record As SIS.QCM.qcmInspections) As SIS.QCM.qcmInspections
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spqcmInspectionsInsert"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RequestID",SqlDbType.Int,11, Record.RequestID)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ProjectID",SqlDbType.NVarChar,7, Record.ProjectID)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OrderNo",SqlDbType.NVarChar,51, Iif(Record.OrderNo= "" ,Convert.DBNull, Record.OrderNo))
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OrderDate",SqlDbType.DateTime,21, Iif(Record.OrderDate= "" ,Convert.DBNull, Record.OrderDate))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RequestID", SqlDbType.Int, 11, Record.RequestID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ProjectID", SqlDbType.NVarChar, 7, Record.ProjectID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OrderNo", SqlDbType.NVarChar, 51, Iif(Record.OrderNo = "", Convert.DBNull, Record.OrderNo))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OrderDate", SqlDbType.DateTime, 21, Iif(Record.OrderDate = "", Convert.DBNull, Record.OrderDate))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SupplierID", SqlDbType.NVarChar, 9, Record.SupplierID)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectionRemarks",SqlDbType.NVarChar,501, Iif(Record.InspectionRemarks= "" ,Convert.DBNull, Record.InspectionRemarks))
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectedBy",SqlDbType.NVarChar,9, Iif(Record.InspectedBy= "" ,Convert.DBNull, Record.InspectedBy))
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectedOn",SqlDbType.DateTime,21, Iif(Record.InspectedOn= "" ,Convert.DBNull, Record.InspectedOn))
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RequestStateID",SqlDbType.NVarChar,11, Record.RequestStateID)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@FileAttached",SqlDbType.Bit,3, Record.FileAttached)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectionStatusID",SqlDbType.Int,11, Iif(Record.InspectionStatusID= "" ,Convert.DBNull, Record.InspectionStatusID))
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectedQuantity",SqlDbType.NVarChar,51, Iif(Record.InspectedQuantity= "" ,Convert.DBNull, Record.InspectedQuantity))
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectionStageiD",SqlDbType.Int,11, Iif(Record.InspectionStageiD= "" ,Convert.DBNull, Record.InspectionStageiD))
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@EnteredBy",SqlDbType.NVarChar,9, Iif(Record.EnteredBy= "" ,Convert.DBNull, Record.EnteredBy))
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@EnteredOn",SqlDbType.DateTime,21, Iif(Record.EnteredOn= "" ,Convert.DBNull, Record.EnteredOn))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectionRemarks", SqlDbType.NVarChar, 501, Iif(Record.InspectionRemarks = "", Convert.DBNull, Record.InspectionRemarks))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectedBy", SqlDbType.NVarChar, 9, Iif(Record.InspectedBy = "", Convert.DBNull, Record.InspectedBy))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectedOn", SqlDbType.DateTime, 21, Iif(Record.InspectedOn = "", Convert.DBNull, Record.InspectedOn))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RequestStateID", SqlDbType.NVarChar, 11, Record.RequestStateID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@FileAttached", SqlDbType.Bit, 3, Record.FileAttached)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectionStatusID", SqlDbType.Int, 11, Iif(Record.InspectionStatusID = "", Convert.DBNull, Record.InspectionStatusID))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectedQuantity", SqlDbType.NVarChar, 51, Iif(Record.InspectedQuantity = "", Convert.DBNull, Record.InspectedQuantity))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectionStageiD", SqlDbType.Int, 11, Iif(Record.InspectionStageiD = "", Convert.DBNull, Record.InspectionStageiD))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@EnteredBy", SqlDbType.NVarChar, 9, Iif(Record.EnteredBy = "", Convert.DBNull, Record.EnteredBy))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@EnteredOn", SqlDbType.DateTime, 21, Iif(Record.EnteredOn = "", Convert.DBNull, Record.EnteredOn))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@UOM", SqlDbType.NVarChar, 10, IIf(Record.UOM = "", Convert.DBNull, Record.UOM))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OfferedQuantity", SqlDbType.NVarChar, 21, IIf(Record.OfferedQuantity = "", Convert.DBNull, Record.OfferedQuantity))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ClearedQuantity", SqlDbType.NVarChar, 21, IIf(Record.ClearedQuantity = "", Convert.DBNull, Record.ClearedQuantity))
@@ -745,6 +769,45 @@ Namespace SIS.QCM
       End Using
       Return Record
     End Function
+    Public Shared Function InsertData(ByVal Record As SIS.QCM.qcmInspections, Comp As String) As SIS.QCM.qcmInspections
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString(Comp))
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.StoredProcedure
+          Cmd.CommandText = "spqcmInspectionsInsert"
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RequestID", SqlDbType.Int, 11, Record.RequestID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ProjectID", SqlDbType.NVarChar, 7, Record.ProjectID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OrderNo", SqlDbType.NVarChar, 51, IIf(Record.OrderNo = "", Convert.DBNull, Record.OrderNo))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OrderDate", SqlDbType.DateTime, 21, IIf(Record.OrderDate = "", Convert.DBNull, Record.OrderDate))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SupplierID", SqlDbType.NVarChar, 9, Record.SupplierID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectionRemarks", SqlDbType.NVarChar, 501, IIf(Record.InspectionRemarks = "", Convert.DBNull, Record.InspectionRemarks))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectedBy", SqlDbType.NVarChar, 9, IIf(Record.InspectedBy = "", Convert.DBNull, Record.InspectedBy))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectedOn", SqlDbType.DateTime, 21, IIf(Record.InspectedOn = "", Convert.DBNull, Record.InspectedOn))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RequestStateID", SqlDbType.NVarChar, 11, Record.RequestStateID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@FileAttached", SqlDbType.Bit, 3, Record.FileAttached)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectionStatusID", SqlDbType.Int, 11, IIf(Record.InspectionStatusID = "", Convert.DBNull, Record.InspectionStatusID))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectedQuantity", SqlDbType.NVarChar, 51, IIf(Record.InspectedQuantity = "", Convert.DBNull, Record.InspectedQuantity))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectionStageiD", SqlDbType.Int, 11, IIf(Record.InspectionStageiD = "", Convert.DBNull, Record.InspectionStageiD))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@EnteredBy", SqlDbType.NVarChar, 9, IIf(Record.EnteredBy = "", Convert.DBNull, Record.EnteredBy))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@EnteredOn", SqlDbType.DateTime, 21, IIf(Record.EnteredOn = "", Convert.DBNull, Record.EnteredOn))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@UOM", SqlDbType.NVarChar, 10, IIf(Record.UOM = "", Convert.DBNull, Record.UOM))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OfferedQuantity", SqlDbType.NVarChar, 21, IIf(Record.OfferedQuantity = "", Convert.DBNull, Record.OfferedQuantity))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ClearedQuantity", SqlDbType.NVarChar, 21, IIf(Record.ClearedQuantity = "", Convert.DBNull, Record.ClearedQuantity))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectedQuantityFinal", SqlDbType.NVarChar, 51, IIf(Record.InspectedQuantityFinal = "", Convert.DBNull, Record.InspectedQuantityFinal))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OfferedQuantityFinal", SqlDbType.NVarChar, 21, IIf(Record.OfferedQuantityFinal = "", Convert.DBNull, Record.OfferedQuantityFinal))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ClearedQuantityFinal", SqlDbType.NVarChar, 21, IIf(Record.ClearedQuantityFinal = "", Convert.DBNull, Record.ClearedQuantityFinal))
+          Cmd.Parameters.Add("@Return_RequestID", SqlDbType.Int, 11)
+          Cmd.Parameters("@Return_RequestID").Direction = ParameterDirection.Output
+          Cmd.Parameters.Add("@Return_InspectionID", SqlDbType.Int, 11)
+          Cmd.Parameters("@Return_InspectionID").Direction = ParameterDirection.Output
+          Con.Open()
+          Cmd.ExecuteNonQuery()
+          Record.RequestID = Cmd.Parameters("@Return_RequestID").Value
+          Record.InspectionID = Cmd.Parameters("@Return_InspectionID").Value
+        End Using
+      End Using
+      Return Record
+    End Function
+
     <DataObjectMethod(DataObjectMethodType.Update, True)> _
     Public Shared Function qcmInspectionsUpdate(ByVal Record As SIS.QCM.qcmInspections) As SIS.QCM.qcmInspections
       Dim _Rec As SIS.QCM.qcmInspections = SIS.QCM.qcmInspections.qcmInspectionsGetByID(Record.RequestID, Record.InspectionID)
