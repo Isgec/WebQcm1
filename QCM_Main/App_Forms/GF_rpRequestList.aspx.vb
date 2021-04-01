@@ -145,8 +145,18 @@ Partial Class GF_rpRequestList
     Dim FileInfo As IO.FileInfo = New IO.FileInfo(FileName)
     Dim xlPk As ExcelPackage = New ExcelPackage(FileInfo)
     Dim xlWS As ExcelWorksheet = xlPk.Workbook.Worksheets("Calls Data")
+    Dim oRqs As New List(Of SIS.QCM.qcmRequests)
+    Dim Comp As String = HttpContext.Current.Session("FinanceCompany")
+    If oRec.AllCompany Then
+      Dim aComp() As String = {"200", "700", "651"}
+      For Each cmp As String In aComp
+        Dim tmp As List(Of SIS.QCM.qcmRequests) = GetRequestCallsAndTrends(oRec, cmp)
+        oRqs.AddRange(tmp)
+      Next
+    Else
+      oRqs = GetRequestCallsAndTrends(oRec, Comp)
+    End If
 
-    Dim oRqs As List(Of SIS.QCM.qcmRequests) = GetRequestCallsAndTrends(oRec)
 
     Dim r As Integer = 5
     Dim c As Integer = 1
@@ -182,17 +192,11 @@ Partial Class GF_rpRequestList
         c += 1
         .Cells(r, c).Value = rq.RequestedInspectionStartDate
         c += 1
-        '.Cells(r, c).Value = rq.AllotedStartDate
         .Cells(r, c).Value = rq.InspectionFinishDate
         c += 1
         .Cells(r, c).Value = Convert.ToDateTime(rq.RequestedInspectionStartDate).ToString("MMM-yy")
         c += 1
         Dim Days As Integer = 0
-        'If rq.AllotedStartDate <> String.Empty Then
-        '	Days = DateDiff(DateInterval.Day, Convert.ToDateTime(rq.RequestedInspectionStartDate), Convert.ToDateTime(rq.AllotedStartDate))
-        'Else
-        '	Days = DateDiff(DateInterval.Day, Convert.ToDateTime(rq.RequestedInspectionStartDate), Now)
-        'End If
         If rq.InspectionStartDate <> String.Empty Then
           Days = DateDiff(DateInterval.Day, Convert.ToDateTime(rq.RequestedInspectionStartDate), Convert.ToDateTime(rq.InspectionStartDate))
         Else
@@ -228,7 +232,7 @@ Partial Class GF_rpRequestList
         c += 1
         .Cells(r, c).Value = rq.UOM
         c += 1
-        Dim tmpIs As List(Of SIS.QCM.qcmInspections) = SIS.QCM.qcmInspections.qcmInspectionsSelectList(0, 999, "", False, "", rq.RequestID)
+        Dim tmpIs As List(Of SIS.QCM.qcmInspections) = SIS.QCM.qcmInspections.qcmInspectionsList(rq.RequestID, rq.Company)
         Dim soQty As Decimal = 0
         Dim siQty As Decimal = 0
         Dim scQty As Decimal = 0
@@ -255,6 +259,12 @@ Partial Class GF_rpRequestList
         c += 1
         .Cells(r, c).Value = fcQty
         c += 1
+        .Cells(r, c).Value = rq.ClosingRemarks
+        c += 1
+        .Cells(r, c).Value = rq.TextRemarks
+        c += 1
+        .Cells(r, c).Value = IIf(rq.AttendedVirtually, "YES", "NO")
+        c += 1
 
         r += 1
       Next
@@ -270,72 +280,76 @@ Partial Class GF_rpRequestList
     xlPk.Dispose()
     Return FileName
   End Function
-  Private Function GetRequestCallsAndTrends(ByVal oRq As SIS.VR.vrReports) As List(Of SIS.QCM.qcmRequests)
-		Dim Sql As String = ""
-		Sql &= "  SELECT"
+  Private Function GetRequestCallsAndTrends(ByVal oRq As SIS.VR.vrReports, Comp As String) As List(Of SIS.QCM.qcmRequests)
+    Dim Sql As String = ""
+    Sql &= "  SELECT"
     Sql &= "		[QCM_Requests].* ,"
+    Sql &= "    (select isnull(description,'') from QCM_InspectionStatus where InspectionStatusID = (select InspectionStatusID from QCM_Inspections where InspectionID = (select max(x.inspectionid) from QCM_Inspections as x where x.RequestStateid <> 'CLOSED' and x.requestid=[QCM_Requests].[RequestID]))) As ClosingRemarks, "
+    Sql &= "    (select replace(replace(isnull(InspectionRemarks,''),char(13),' '),char(10), '') from QCM_Inspections where InspectionID = (select max(x.inspectionid) from QCM_Inspections as x where x.RequestStateid <> 'CLOSED' and x.requestid=[QCM_Requests].[RequestID])) As TextRemarks, "
     Sql &= "		[HRM_Employees1].[EmployeeName] AS HRM_Employees1_EmployeeName,"
     Sql &= "		[HRM_Employees2].[UserFullName] AS HRM_Employees2_EmployeeName,"
     Sql &= "		[HRM_Employees3].[EmployeeName] AS HRM_Employees3_EmployeeName,"
-		Sql &= "		[HRM_Employees4].[EmployeeName] AS HRM_Employees4_EmployeeName,"
-		Sql &= "		[HRM_Employees5].[EmployeeName] AS HRM_Employees5_EmployeeName,"
-		Sql &= "		[IDM_Projects6].[Description] AS IDM_Projects6_Description,"
-		Sql &= "		[IDM_Vendors7].[Description] AS IDM_Vendors7_Description,"
-		Sql &= "		[QCM_InspectionStages8].[Description] AS QCM_InspectionStages8_Description,"
-		Sql &= "		[QCM_ReceivingMediums9].[Description] AS QCM_ReceivingMediums9_Description,"
-		Sql &= "		[QCM_RequestStates10].[Description] AS QCM_RequestStates10_Description,"
-		Sql &= "		[QCM_InspectionStatus11].[Description] AS QCM_InspectionStatus11_Description, "
-		Sql &= "		[QCM_Regions12].[RegionName] AS QCM_Regions12_RegionName "
-		Sql &= "  FROM [QCM_Requests] "
-		Sql &= "  INNER JOIN [HRM_Employees] AS [HRM_Employees1]"
-		Sql &= "    ON [QCM_Requests].[CreatedBy] = [HRM_Employees1].[CardNo]"
-    Sql &= "  LEFT OUTER JOIN [aspnet_users] AS [HRM_Employees2]"
+    Sql &= "		[HRM_Employees4].[EmployeeName] AS HRM_Employees4_EmployeeName,"
+    Sql &= "		[HRM_Employees5].[EmployeeName] AS HRM_Employees5_EmployeeName,"
+    Sql &= "		[IDM_Projects6].[Description] AS IDM_Projects6_Description,"
+    Sql &= "		[IDM_Vendors7].[Description] AS IDM_Vendors7_Description,"
+    Sql &= "		[QCM_InspectionStages8].[Description] AS QCM_InspectionStages8_Description,"
+    Sql &= "		[QCM_ReceivingMediums9].[Description] AS QCM_ReceivingMediums9_Description,"
+    Sql &= "		[QCM_RequestStates10].[Description] AS QCM_RequestStates10_Description,"
+    Sql &= "		[QCM_InspectionStatus11].[Description] AS QCM_InspectionStatus11_Description, "
+    Sql &= "		[QCM_Regions12].[RegionName] AS QCM_Regions12_RegionName "
+    Sql &= "  FROM [QCM_Requests] "
+    Sql &= "  INNER JOIN [IJTPerks].[dbo].[HRM_Employees] AS [HRM_Employees1]"
+    Sql &= "    ON [QCM_Requests].[CreatedBy] = [HRM_Employees1].[CardNo]"
+    Sql &= "  LEFT OUTER JOIN [IJTPerks].[dbo].[aspnet_users] AS [HRM_Employees2]"
     Sql &= "    ON [QCM_Requests].[AllotedTo] = [HRM_Employees2].[LoginID]"
-    Sql &= "  LEFT OUTER JOIN [HRM_Employees] AS [HRM_Employees3]"
-		Sql &= "    ON [QCM_Requests].[AllotedBy] = [HRM_Employees3].[CardNo]"
-		Sql &= "  LEFT OUTER JOIN [HRM_Employees] AS [HRM_Employees4]"
-		Sql &= "    ON [QCM_Requests].[CancelledBy] = [HRM_Employees4].[CardNo]"
-		Sql &= "  LEFT OUTER JOIN [HRM_Employees] AS [HRM_Employees5]"
-		Sql &= "    ON [QCM_Requests].[ReceivedBy] = [HRM_Employees5].[CardNo]"
-		Sql &= "  INNER JOIN [IDM_Projects] AS [IDM_Projects6]"
-		Sql &= "    ON [QCM_Requests].[ProjectID] = [IDM_Projects6].[ProjectID]"
-		Sql &= "  INNER JOIN [IDM_Vendors] AS [IDM_Vendors7]"
-		Sql &= "    ON [QCM_Requests].[SupplierID] = [IDM_Vendors7].[VendorID]"
-		Sql &= "  LEFT OUTER JOIN [QCM_InspectionStages] AS [QCM_InspectionStages8]"
-		Sql &= "    ON [QCM_Requests].[InspectionStageiD] = [QCM_InspectionStages8].[InspectionStageID]"
-		Sql &= "  LEFT OUTER JOIN [QCM_ReceivingMediums] AS [QCM_ReceivingMediums9]"
-		Sql &= "    ON [QCM_Requests].[ReceivingMediumID] = [QCM_ReceivingMediums9].[ReceivingMediumID]"
-		Sql &= "  INNER JOIN [QCM_RequestStates] AS [QCM_RequestStates10]"
-		Sql &= "    ON [QCM_Requests].[RequestStateID] = [QCM_RequestStates10].[StateID]"
-		Sql &= "  LEFT OUTER JOIN [QCM_InspectionStatus] AS [QCM_InspectionStatus11]"
-		Sql &= "    ON [QCM_Requests].[InspectionStatusID] = [QCM_InspectionStatus11].[InspectionStatusID]"
-		Sql &= "  LEFT OUTER JOIN [QCM_Regions] AS [QCM_Regions12]"
-		Sql &= "    ON [QCM_Requests].[RegionID] = [QCM_Regions12].[RegionID]"
-		Sql &= "  WHERE"
-		Sql &= "  [QCM_Requests].[RequestedInspectionStartDate] >= '" & Convert.ToDateTime(oRq.FReqDt).ToString("yyyy-MM-dd") & "' AND [QCM_Requests].[RequestedInspectionStartDate] < '" & Convert.ToDateTime(oRq.TReqDt).AddDays(1).ToString("yyyy-MM-dd") & "'"
+    Sql &= "  LEFT OUTER JOIN [IJTPerks].[dbo].[HRM_Employees] AS [HRM_Employees3]"
+    Sql &= "    ON [QCM_Requests].[AllotedBy] = [HRM_Employees3].[CardNo]"
+    Sql &= "  LEFT OUTER JOIN [IJTPerks].[dbo].[HRM_Employees] AS [HRM_Employees4]"
+    Sql &= "    ON [QCM_Requests].[CancelledBy] = [HRM_Employees4].[CardNo]"
+    Sql &= "  LEFT OUTER JOIN [IJTPerks].[dbo].[HRM_Employees] AS [HRM_Employees5]"
+    Sql &= "    ON [QCM_Requests].[ReceivedBy] = [HRM_Employees5].[CardNo]"
+    Sql &= "  INNER JOIN [IDM_Projects] AS [IDM_Projects6]"
+    Sql &= "    ON [QCM_Requests].[ProjectID] = [IDM_Projects6].[ProjectID]"
+    Sql &= "  INNER JOIN [IDM_Vendors] AS [IDM_Vendors7]"
+    Sql &= "    ON [QCM_Requests].[SupplierID] = [IDM_Vendors7].[VendorID]"
+    Sql &= "  LEFT OUTER JOIN [QCM_InspectionStages] AS [QCM_InspectionStages8]"
+    Sql &= "    ON [QCM_Requests].[InspectionStageiD] = [QCM_InspectionStages8].[InspectionStageID]"
+    Sql &= "  LEFT OUTER JOIN [QCM_ReceivingMediums] AS [QCM_ReceivingMediums9]"
+    Sql &= "    ON [QCM_Requests].[ReceivingMediumID] = [QCM_ReceivingMediums9].[ReceivingMediumID]"
+    Sql &= "  INNER JOIN [QCM_RequestStates] AS [QCM_RequestStates10]"
+    Sql &= "    ON [QCM_Requests].[RequestStateID] = [QCM_RequestStates10].[StateID]"
+    Sql &= "  LEFT OUTER JOIN [QCM_InspectionStatus] AS [QCM_InspectionStatus11]"
+    Sql &= "    ON [QCM_Requests].[InspectionStatusID] = [QCM_InspectionStatus11].[InspectionStatusID]"
+    Sql &= "  LEFT OUTER JOIN [QCM_Regions] AS [QCM_Regions12]"
+    Sql &= "    ON [QCM_Requests].[RegionID] = [QCM_Regions12].[RegionID]"
+    Sql &= "  WHERE"
+    Sql &= "  [QCM_Requests].[RequestedInspectionStartDate] >= '" & Convert.ToDateTime(oRq.FReqDt).ToString("yyyy-MM-dd") & "' AND [QCM_Requests].[RequestedInspectionStartDate] < '" & Convert.ToDateTime(oRq.TReqDt).AddDays(1).ToString("yyyy-MM-dd") & "'"
     Sql &= "  AND [QCM_Requests].[RequestStateID] NOT IN ('OPEN','CANCELLED','RETURNED')"
     If oRq.FUser <> String.Empty Then
-			Sql &= " AND [QCM_Requests].[AllotedTo] = '" & oRq.FUser & "' "
-		End If
-		If oRq.RegionID <> String.Empty Then
-			Sql &= " AND [QCM_Requests].[RegionID] = " & oRq.RegionID
-		End If
-		Sql &= " ORDER BY [QCM_Requests].[RequestedInspectionStartDate]"
+      Sql &= " AND [QCM_Requests].[AllotedTo] = '" & oRq.FUser & "' "
+    End If
+    If oRq.RegionID <> String.Empty Then
+      Sql &= " AND [QCM_Requests].[RegionID] = " & oRq.RegionID
+    End If
+    Sql &= " ORDER BY [QCM_Requests].[RequestedInspectionStartDate]"
 
-		Dim Results As List(Of SIS.QCM.qcmRequests) = Nothing
-		Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
-			Using Cmd As SqlCommand = Con.CreateCommand()
-				Cmd.CommandType = CommandType.Text
-				Cmd.CommandText = Sql
-				Results = New List(Of SIS.QCM.qcmRequests)()
-				Con.Open()
-				Dim Reader As SqlDataReader = Cmd.ExecuteReader()
-				While (Reader.Read())
-					Results.Add(New SIS.QCM.qcmRequests(Reader))
-				End While
-				Reader.Close()
-			End Using
-		End Using
-		Return Results
-	End Function
+    Dim Results As List(Of SIS.QCM.qcmRequests) = Nothing
+    Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString(Comp))
+      Using Cmd As SqlCommand = Con.CreateCommand()
+        Cmd.CommandType = CommandType.Text
+        Cmd.CommandText = Sql
+        Results = New List(Of SIS.QCM.qcmRequests)()
+        Con.Open()
+        Dim Reader As SqlDataReader = Cmd.ExecuteReader()
+        While (Reader.Read())
+          Dim x As New SIS.QCM.qcmRequests(Reader)
+          x.Company = Comp
+          Results.Add(x)
+        End While
+        Reader.Close()
+      End Using
+    End Using
+    Return Results
+  End Function
 End Class

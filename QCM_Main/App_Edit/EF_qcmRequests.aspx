@@ -221,9 +221,9 @@
                   style="text-align: Right"
                   MaxLength="14"
                   onfocus = "return this.select();"
+                  onblur="return dc(this,2);"
 						      ValidationGroup = "qcmRequests"
                   ClientIDMode="Static"
-                  type="number"
                   runat="server" />
                 <asp:RequiredFieldValidator 
                   ID = "RFVTotalRequestedQuantity"
@@ -246,9 +246,9 @@
                   style="text-align: Right"
                   MaxLength="14"
                   onfocus = "return this.select();"
+                  onblur="return dc(this,2);"
                   ValidationGroup = "qcmRequests"
                   ClientIDMode="Static"
-                  type="number"
                   runat="server" />
                 <asp:RequiredFieldValidator 
                   ID = "RFVLotSize"

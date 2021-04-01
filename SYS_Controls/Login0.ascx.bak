@@ -38,6 +38,7 @@
         <tr>
         <td>
           <LGM:Informations ID="Informations1" Visible="false" runat="server" />
+          <asp:Label ID="sysInfo" runat="server" Text=""></asp:Label>
         </td>
         <td style="vertical-align:top;text-align:right;">
             <asp:LinkButton ID="LinkButton1"  runat="server" Height="26px"  PostBackUrl="~/ChangePassword.aspx" Text="Change Password" /><br />

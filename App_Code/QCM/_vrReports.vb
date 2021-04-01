@@ -26,7 +26,8 @@ Namespace SIS.VR
     Private _FK_VR_Reports_TUser As SIS.QCM.qcmUsers = Nothing
     Private _FK_VR_Reports_FProjectID As SIS.QCM.qcmProjects = Nothing
     Private _FK_VR_Reports_TProjectID As SIS.QCM.qcmProjects = Nothing
-		Public ReadOnly Property ForeColor() As System.Drawing.Color
+    Public Property AllCompany As Boolean = True
+    Public ReadOnly Property ForeColor() As System.Drawing.Color
 			Get
 				Dim mRet As System.Drawing.Color = Drawing.Color.Blue
 				Try

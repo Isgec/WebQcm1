@@ -74,6 +74,9 @@ Namespace SIS.QCM
     Public Property TotalHrs As Decimal = 0
     Public Property POWeight As Decimal = 0
     Public Property Company As String = ""
+    Public Property AttendedVirtually As Boolean = False
+    Public Property ClosingRemarks As String = ""
+    Public Property TextRemarks As String = ""
     Public Property LotSize As String
       Get
         Return _LotSize
@@ -1095,6 +1098,7 @@ Namespace SIS.QCM
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@TotalHrs", SqlDbType.Decimal, 21, Record.TotalHrs)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LastPausedOn", SqlDbType.DateTime, 21, IIf(Record.LastPausedOn = "", Convert.DBNull, Record.LastPausedOn))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@POWeight", SqlDbType.Decimal, 21, Record.POWeight)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@AttendedVirtually", SqlDbType.Bit, 3, Record.AttendedVirtually)
           Cmd.Parameters.Add("@Return_RequestID", SqlDbType.Int, 11)
           Cmd.Parameters("@Return_RequestID").Direction = ParameterDirection.Output
           Con.Open()
@@ -1177,6 +1181,7 @@ Namespace SIS.QCM
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@TotalHrs", SqlDbType.Decimal, 21, Record.TotalHrs)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LastPausedOn", SqlDbType.DateTime, 21, IIf(Record.LastPausedOn = "", Convert.DBNull, Record.LastPausedOn))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@POWeight", SqlDbType.Decimal, 21, Record.POWeight)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@AttendedVirtually", SqlDbType.Bit, 3, Record.AttendedVirtually)
           Cmd.Parameters.Add("@RowCount", SqlDbType.Int)
           Cmd.Parameters("@RowCount").Direction = ParameterDirection.Output
           _RecordCount = -1
@@ -1234,6 +1239,7 @@ Namespace SIS.QCM
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@TotalHrs", SqlDbType.Decimal, 21, Record.TotalHrs)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LastPausedOn", SqlDbType.DateTime, 21, IIf(Record.LastPausedOn = "", Convert.DBNull, Record.LastPausedOn))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@POWeight", SqlDbType.Decimal, 21, Record.POWeight)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@AttendedVirtually", SqlDbType.Bit, 3, Record.AttendedVirtually)
           Cmd.Parameters.Add("@RowCount", SqlDbType.Int)
           Cmd.Parameters("@RowCount").Direction = ParameterDirection.Output
           _RecordCount = -1

@@ -1,8 +1,8 @@
 <%@ Master Language="VB" CodeFile="MasterPage.master.vb" Inherits="lgMasterPage" %>
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-  <title>ISGEC-Travel Bill Management</title>
+  <title>Quality Inspection Call Management</title>
   <link rel="SHORTCUT ICON" type="image/x-icon" runat="server" href="~/isgec.ico" />
   <link rel="stylesheet" href="/../UserRights/Menu/Menu.css" />
   <script type="text/javascript" src="/../UserRights/jquery/jquery.js"></script>
@@ -11,6 +11,7 @@
   <script type="text/javascript">
     $(function () {
       $(".page").resizable();
+      //$(".page").draggable();
     });
   </script>
   <asp:ContentPlaceHolder ID="cphMain" runat="server" EnableViewState="true">
@@ -66,7 +67,7 @@
         </td>
       </tr>
       <tr>
-        <td colspan="2" class="wp_body" runat="server" id="mainBody">
+        <td colspan="2" class="sis_body" runat="server" id="mainBody">
           <asp:ContentPlaceHolder ID="cph1" runat="server" EnableViewState="true">
           </asp:ContentPlaceHolder>
         </td>
@@ -76,12 +77,12 @@
           <table style="width: 100%">
             <tr>
               <td>
-                <span style="color: #ffffff"><font size="1">© ISGEC Heavy Engineering Limited. All rights reserved.</font></span>
+                <span style="color:#ffffff;font-size:9px;">© ISGEC Heavy Engineering Limited. All rights reserved.</span>
               </td>
             </tr>
             <tr>
               <td>
-                <font size="1"><span style="color: #ffffff">A-4, Sector-24, NOIDA, U.P. 201 301, INDIA </span></font>
+                <span style="color: #ffffff;font-size:9px;">A-4, Sector-24, NOIDA, U.P. 201 301, INDIA </span>
               </td>
             </tr>
             <tr>

@@ -46,6 +46,8 @@ Namespace SIS.QCM
     Private _FK_QCM_Inspections_EnteredBy As SIS.QCM.qcmUsers = Nothing
     Private _FK_QCM_Inspections_RequestID As SIS.QCM.qcmRequests = Nothing
     Public Property Company As String = ""
+    Public Property AttendedVirtually As Boolean = False
+
     Public Property InspectedQuantityFinal() As String
       Get
         Return _InspectedQuantityFinal
@@ -639,14 +641,14 @@ Namespace SIS.QCM
       End Using
       Return Results
     End Function
-    <DataObjectMethod(DataObjectMethodType.Select)> _
-    Public Shared Function GetByRequestStateID(ByVal RequestStateID As String, ByVal OrderBy as String) As List(Of SIS.QCM.qcmInspections)
+    <DataObjectMethod(DataObjectMethodType.Select)>
+    Public Shared Function GetByRequestStateID(ByVal RequestStateID As String, ByVal OrderBy As String) As List(Of SIS.QCM.qcmInspections)
       Dim Results As List(Of SIS.QCM.qcmInspections) = Nothing
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spqcmInspectionsSelectByRequestStateID"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RequestStateID",SqlDbType.NVarChar,RequestStateID.ToString.Length, RequestStateID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RequestStateID", SqlDbType.NVarChar, RequestStateID.ToString.Length, RequestStateID)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NvarChar, 9, HttpContext.Current.Session("LoginID"))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OrderBy", SqlDbType.NVarChar, 50, OrderBy)
           Cmd.Parameters.Add("@RecordCount", SqlDbType.Int)
@@ -664,6 +666,34 @@ Namespace SIS.QCM
       End Using
       Return Results
     End Function
+    <DataObjectMethod(DataObjectMethodType.Select)>
+    Public Shared Function qcmInspectionsList(ByVal RequestID As Int32, comp As String) As List(Of SIS.QCM.qcmInspections)
+      Dim Results As List(Of SIS.QCM.qcmInspections) = Nothing
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString(comp))
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.StoredProcedure
+          Cmd.CommandText = "spqcmInspectionsSelectListFilteres"
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Filter_RequestID", SqlDbType.Int, 10, IIf(RequestID = Nothing, 0, RequestID))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@StartRowIndex", SqlDbType.Int, -1, 0)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@MaximumRows", SqlDbType.Int, -1, 999)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, "")
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OrderBy", SqlDbType.NVarChar, 50, "")
+          Cmd.Parameters.Add("@RecordCount", SqlDbType.Int)
+          Cmd.Parameters("@RecordCount").Direction = ParameterDirection.Output
+          _RecordCount = -1
+          Results = New List(Of SIS.QCM.qcmInspections)()
+          Con.Open()
+          Dim Reader As SqlDataReader = Cmd.ExecuteReader()
+          While (Reader.Read())
+            Results.Add(New SIS.QCM.qcmInspections(Reader))
+          End While
+          Reader.Close()
+          _RecordCount = Cmd.Parameters("@RecordCount").Value
+        End Using
+      End Using
+      Return Results
+    End Function
+
     <DataObjectMethod(DataObjectMethodType.Select)> _
     Public Shared Function qcmInspectionsSelectList(ByVal StartRowIndex As Integer, ByVal MaximumRows As Integer, ByVal OrderBy As String, ByVal SearchState As Boolean, ByVal SearchText As String, ByVal RequestID As Int32) As List(Of SIS.QCM.qcmInspections)
       Dim Results As List(Of SIS.QCM.qcmInspections) = Nothing
@@ -724,6 +754,7 @@ Namespace SIS.QCM
         .InspectedQuantityFinal = Record.InspectedQuantityFinal
         .OfferedQuantityFinal = Record.OfferedQuantityFinal
         .ClearedQuantityFinal = Record.ClearedQuantityFinal
+        .AttendedVirtually = Record.AttendedVirtually
       End With
       If Record.Company = "" Then
         Return SIS.QCM.qcmInspections.InsertData(_Rec)
@@ -757,6 +788,7 @@ Namespace SIS.QCM
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectedQuantityFinal", SqlDbType.NVarChar, 51, IIf(Record.InspectedQuantityFinal = "", Convert.DBNull, Record.InspectedQuantityFinal))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OfferedQuantityFinal", SqlDbType.NVarChar, 21, IIf(Record.OfferedQuantityFinal = "", Convert.DBNull, Record.OfferedQuantityFinal))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ClearedQuantityFinal", SqlDbType.NVarChar, 21, IIf(Record.ClearedQuantityFinal = "", Convert.DBNull, Record.ClearedQuantityFinal))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@AttendedVirtually", SqlDbType.Bit, 3, Record.AttendedVirtually)
           Cmd.Parameters.Add("@Return_RequestID", SqlDbType.Int, 11)
           Cmd.Parameters("@Return_RequestID").Direction = ParameterDirection.Output
           Cmd.Parameters.Add("@Return_InspectionID", SqlDbType.Int, 11)
@@ -795,6 +827,7 @@ Namespace SIS.QCM
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectedQuantityFinal", SqlDbType.NVarChar, 51, IIf(Record.InspectedQuantityFinal = "", Convert.DBNull, Record.InspectedQuantityFinal))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OfferedQuantityFinal", SqlDbType.NVarChar, 21, IIf(Record.OfferedQuantityFinal = "", Convert.DBNull, Record.OfferedQuantityFinal))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ClearedQuantityFinal", SqlDbType.NVarChar, 21, IIf(Record.ClearedQuantityFinal = "", Convert.DBNull, Record.ClearedQuantityFinal))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@AttendedVirtually", SqlDbType.Bit, 3, Record.AttendedVirtually)
           Cmd.Parameters.Add("@Return_RequestID", SqlDbType.Int, 11)
           Cmd.Parameters("@Return_RequestID").Direction = ParameterDirection.Output
           Cmd.Parameters.Add("@Return_InspectionID", SqlDbType.Int, 11)
@@ -858,6 +891,7 @@ Namespace SIS.QCM
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@InspectedQuantityFinal", SqlDbType.NVarChar, 51, IIf(Record.InspectedQuantityFinal = "", Convert.DBNull, Record.InspectedQuantityFinal))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OfferedQuantityFinal", SqlDbType.NVarChar, 21, IIf(Record.OfferedQuantityFinal = "", Convert.DBNull, Record.OfferedQuantityFinal))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ClearedQuantityFinal", SqlDbType.NVarChar, 21, IIf(Record.ClearedQuantityFinal = "", Convert.DBNull, Record.ClearedQuantityFinal))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@AttendedVirtually", SqlDbType.Bit, 3, Record.AttendedVirtually)
           Cmd.Parameters.Add("@RowCount", SqlDbType.Int)
           Cmd.Parameters("@RowCount").Direction = ParameterDirection.Output
           _RecordCount = -1

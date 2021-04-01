@@ -751,9 +751,6 @@ Partial Class GF_rpMiscReport
         c += 1
         .Cells(r, c).Value = rq.InspectionStartDate
         c += 1
-
-
-
         .Cells(r, c).Value = IIf(rq.Paused, "YES", "NO")
         c += 1
         r += 1

@@ -220,7 +220,7 @@ Namespace SIS.SYS.Utilities
         Case "DF_"
           FileName = FileName.Replace("DF_", "GD_")
       End Select
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString("200"))
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spSYS_LG_VRSessionByUserFile"

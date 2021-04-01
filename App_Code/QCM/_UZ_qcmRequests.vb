@@ -8,6 +8,11 @@ Imports System.Web.Mail
 
 Namespace SIS.QCM
   Partial Public Class qcmRequests
+    Public ReadOnly Property POIssued As String
+      Get
+        Return IIf(Not SIS.QCM.qcmRequests.IsPOIssued(OrderNo), "PO No.: " & OrderNo & " is NOT issued in Packing List Module.", "")
+      End Get
+    End Property
 
     Public ReadOnly Property NewTotalQuantity As String
       Get
@@ -131,16 +136,33 @@ Namespace SIS.QCM
         Return False
       End Get
     End Property
+    Public Shared Function IsPOIssued(ByVal PONumber As String) As Boolean
+      Dim mRet As Integer = 0
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString)
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.Text
+          Cmd.CommandText = "select isnull(count(*),0) from PAK_PO where POFor='PK' and PONumber ='" & PONumber & "'"
+          Con.Open()
+          mRet = Cmd.ExecuteScalar
+        End Using
+      End Using
+      Return (mRet > 0)
+    End Function
+
     Public Shared Function ForwardForAllotment(ByVal RequestID As Integer) As Boolean
       Dim oReq As SIS.QCM.qcmRequests = SIS.QCM.qcmRequests.qcmRequestsGetByID(RequestID)
-      With oReq
-        If Convert.ToDateTime(oReq.RequestedInspectionStartDate).Date <= Now.Date Then
-          Throw New Exception("Can NOT forward Inspenction request for today or earlier date. Pl. change requested date, then forward")
-        ElseIf Now.Hour > 11 Then
-          If Convert.ToDateTime(oReq.RequestedInspectionStartDate).Date <= Now.AddDays(1).Date Then
-            Throw New Exception("After 11 AM, you can raise Inspection request for day after tomorrow only. Pl. change requested date, then forward.")
-          End If
+      If Convert.ToDateTime(oReq.RequestedInspectionStartDate).Date <= Now.Date Then
+        Throw New Exception("Can NOT forward Inspenction request for today or earlier date. Pl. change requested date, then forward")
+      ElseIf Now.Hour > 11 Then
+        If Convert.ToDateTime(oReq.RequestedInspectionStartDate).Date <= Now.AddDays(1).Date Then
+          Throw New Exception("After 11 AM, you can raise Inspection request for day after tomorrow only. Pl. change requested date, then forward.")
         End If
+      End If
+      'It is NOT to be stopped, only information to be given
+      'If Not IsPOIssued(oReq.OrderNo) Then
+      '  Throw New Exception("PO No.: " & oReq.OrderNo & " is not issued in Packing List Module.")
+      'End If
+      With oReq
         .ReturnRemarks = ""
         .CreatedOn = Now
         .RequestStateID = "UNDERALLOT"
@@ -184,18 +206,36 @@ Namespace SIS.QCM
           .RequestStateID = "RETURNED"
         End With
         oReq = SIS.QCM.qcmRequests.UpdateData(oReq)
+        Try
+          ReturnOfferList(oReq.RequestID)
+        Catch ex As Exception
+        End Try
         SendReturnEMail(oReq)
       Catch ex As Exception
         Return False
       End Try
       Return True
     End Function
+    Public Shared Function ReturnOfferList(ByVal RequestID As Int32) As Integer
+      Dim Results As Integer = 0
+      'StatusID 3=>UnderQualityInspection, 1=>Returned
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString)
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.Text
+          Cmd.CommandText = "update PAK_QCListH set StatusID=1, ClearedOn=GetDate(), ClearedBy='" & HttpContext.Current.Session("LoginID") & "' where StatusID=3 and QCRequestNo=" & RequestID
+          Con.Open()
+          Results = Cmd.ExecuteNonQuery
+        End Using
+      End Using
+      Return Results
+    End Function
+
     Public Shared Function SendReturnEMail(ByVal Record As SIS.QCM.qcmRequests) As String
       Dim mMailID As String = SIS.SYS.Utilities.ApplicationSpacific.NextMailNo
       Dim mRet As String = ""
       Dim ToEMailID As String = ""
       Dim FromEMailID As String = ""
-      ToEMailID = Record.FK_QCM_Requests_Createdby.EMailID
+      ToEMailID = SIS.QCM.qcmUsers.qcmUsersGetByID(Record.CreatedBy).EMailID
       FromEMailID = Record.FK_QCM_Requests_AllotedBy.EMailID
       If ToEMailID <> String.Empty And FromEMailID <> String.Empty Then
         Try
@@ -307,10 +347,15 @@ Namespace SIS.QCM
         If oReq.InspectionStartDate = String.Empty Then
           oReq.InspectionStartDate = oIns.InspectedOn
           oReq.RequestStateID = "INSPECTED"
+          oReq.AttendedVirtually = oIns.AttendedVirtually
           SIS.QCM.qcmRequests.UpdateData(oReq)
         ElseIf Convert.ToDateTime(oReq.InspectionStartDate) > Convert.ToDateTime(oIns.InspectedOn) Then
           oReq.InspectionStartDate = oIns.InspectedOn
           oReq.RequestStateID = "INSPECTED"
+          oReq.AttendedVirtually = oIns.AttendedVirtually
+          SIS.QCM.qcmRequests.UpdateData(oReq)
+        Else
+          oReq.AttendedVirtually = oIns.AttendedVirtually
           SIS.QCM.qcmRequests.UpdateData(oReq)
         End If
       Catch ex As Exception
@@ -324,11 +369,16 @@ Namespace SIS.QCM
         If oReq.InspectionStartDate = String.Empty Then
           oReq.InspectionStartDate = oIns.InspectedOn
           oReq.RequestStateID = "INSPECTED"
+          oReq.AttendedVirtually = oIns.AttendedVirtually
           SIS.QCM.qcmRequests.UpdateData(oReq)
         ElseIf Convert.ToDateTime(oReq.InspectionStartDate) > Convert.ToDateTime(oIns.InspectedOn) Then
           oReq.InspectionStartDate = oIns.InspectedOn
           oReq.RequestStateID = "INSPECTED"
+          oReq.AttendedVirtually = oIns.AttendedVirtually
           SIS.QCM.qcmRequests.UpdateData(oReq, comp)
+        Else
+          oReq.AttendedVirtually = oIns.AttendedVirtually
+          SIS.QCM.qcmRequests.UpdateData(oReq)
         End If
       Catch ex As Exception
         Return False

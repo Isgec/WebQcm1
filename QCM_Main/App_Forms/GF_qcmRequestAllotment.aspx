@@ -159,7 +159,6 @@
 						Runat="Server" />
 				</td>
 			</tr>
-
     </table>
 		</asp:Panel>
 		<AJX:CollapsiblePanelExtender ID="cpe1" runat="Server" TargetControlID="pnlD" ExpandControlID="pnlH" CollapseControlID="pnlH" Collapsed="True" TextLabelID="lblH" ImageControlID="imgH" ExpandedText="(Hide Filters...)" CollapsedText="(Show Filters...)" ExpandedImage="~/images/ua.png" CollapsedImage="~/images/da.png" SuppressPostBack="true" />
@@ -177,15 +176,15 @@
           <ItemTemplate>
             <asp:Label ID="LabelRequestID" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("RequestID") %>'></asp:Label>
           </ItemTemplate>
-          <HeaderStyle CssClass="alignright" />
-          <ItemStyle CssClass="alignright" />
-          <HeaderStyle Width="40px" />
+          <HeaderStyle CssClass="alignleft" Width="40px" />
+          <ItemStyle CssClass="alignleft" />
+          <HeaderStyle  />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="Project ID" SortExpression="IDM_Projects6_Description">
           <ItemTemplate>
              <asp:Label ID="L_ProjectID" runat="server" ForeColor='<%# EVal("ForeColor") %>' Title='<%# EVal("ProjectID") %>' Text='<%# Eval("IDM_Projects6_Description") %>'></asp:Label>
           </ItemTemplate>
-          <HeaderStyle Width="100px" />
+          <HeaderStyle Width="150px" />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="Supplier ID" SortExpression="IDM_Vendors7_Description">
           <ItemTemplate>
@@ -197,19 +196,21 @@
           <ItemTemplate>
             <asp:Label ID="LabelDescription" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("Description") %>'></asp:Label>
           </ItemTemplate>
-        <HeaderStyle Width="100px" />
+        <HeaderStyle Width="200px" />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="Total Requested Quantity" SortExpression="TotalRequestedQuantity">
           <ItemTemplate>
             <asp:Label ID="LabelTotalRequestedQuantity" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Eval("NewTotalQuantity") %>'></asp:Label>
           </ItemTemplate>
-        <HeaderStyle Width="100px" />
+          <HeaderStyle Width="50px" />
+          <ItemStyle CssClass="alignCenter" />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="Requested Date" SortExpression="RequestedInspectionStartDate">
           <ItemTemplate>
             <asp:Label ID="LabelRequestedInspectionStartDate" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("RequestedInspectionStartDate") %>'></asp:Label>
           </ItemTemplate>
-        <HeaderStyle Width="80px" />
+          <HeaderStyle Width="80px" />
+          <ItemStyle CssClass="alignCenter" />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="Created By" SortExpression="HRM_Employees1_EmployeeName">
           <ItemTemplate>
@@ -233,9 +234,9 @@
             Visible='<%# Eval("AllotVisible") %>'
             ToolTip="Enter Return Reason."
             MaxLength="250"
-            Width="150px" 
+            Width="100px" 
             ValidationGroup='<%# "Reject" & Container.DataItemIndex %>'
-            runat="server" />
+            runat="server" /><br />
           <asp:RequiredFieldValidator 
             ID = "RFVReturnRemarks"
             runat = "server"
@@ -247,9 +248,9 @@
             ForeColor="Red"
             SetFocusOnError="true" />
           </ItemTemplate>
-        <HeaderStyle Width="80px" />
+        <HeaderStyle Width="40px" />
         </asp:TemplateField>
-        <asp:TemplateField HeaderText="RETURN">
+        <asp:TemplateField HeaderText="RET">
           <ItemTemplate>
              <asp:ImageButton ID="cmdReturn" runat="server" Visible='<%# Eval("AllotVisible") %>'  ValidationGroup='<%# "Reject" & Container.DataItemIndex %>' CausesValidation="true" AlternateText="Return" ToolTip="Return the record." SkinID="reject" CommandName="lgReturn" CommandArgument='<%# Container.DataItemIndex %>' OnClientClick='<%# "return Page_ClientValidate(""Reject" & Container.DataItemIndex & """) && confirm(""Return record ?"");" %>' />
           </ItemTemplate>
@@ -263,9 +264,9 @@
 						</tr>
 						<tr style="background-color:AntiqueWhite; color:DeepPink">
 							<td></td>
-							<td></td>
-							<td></td>
-							<td></td>
+							<td colspan="3">
+                <b>Attended Virtually:&nbsp;</b><%# Eval("AttendedVirtually") %>
+							</td>
 							<td><li><b>
 								<asp:Label ID="labelRegion" runat="server" Text='<%# Eval("QCM_Regions12_RegionName") %>' />
 							</b></li>

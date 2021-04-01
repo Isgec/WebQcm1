@@ -17,6 +17,7 @@ Namespace SIS.QCM
         mRet &= "<li>" & FK_QCM_Requests_Createdby.EmployeeName & "</li>"
         mRet &= "<li>" & AllotmentRemarks & "</li>"
         mRet &= "<li>Inspection Date: " & AllotedFinishDate & "</li>"
+        mRet &= "<li>Online QC Enabled: " & IIf(IsQCEnabledOnPO(OrderNo), "YES", "NO") & "</li>"
         Return mRet
       End Get
     End Property
@@ -1040,6 +1041,16 @@ Namespace SIS.QCM
               Catch ex As Exception
                 .AppendLine("<td></td></tr>")
               End Try
+              Try
+                If IsQCEnabledOnPO(Record.OrderNo) Then
+                  .AppendLine("<tr><td bgcolor=""lightgray""><b>ONLINE Quality Crearance</b></td>")
+                  .AppendLine("<td>ENABLED</td></tr>")
+                Else
+                  .AppendLine("<tr><td bgcolor=""lightgray""><b>ONLINE Quality Crearance</b></td>")
+                  .AppendLine("<td></td></tr>")
+                End If
+              Catch ex As Exception
+              End Try
               .AppendLine("</table>")
               'Pendig Call List From E-Mail is stopped
               '.Append(GetPendigRequestHTML(Record.AllotedTo, mMailID))
@@ -1127,6 +1138,22 @@ Namespace SIS.QCM
       End If
       SendNotificationEMail(Record)
       Return mMailID
+    End Function
+    Public Shared Function IsQCEnabledOnPO(PONumber As String) As Boolean
+      Dim mRet As Boolean = False
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.Text
+          Cmd.CommandText = "select isnull(count(*),0) as cnt from PAK_PO where PONumber='" & PONumber & "' and POFOR='PK' and QCRequired=1"
+          Con.Open()
+          Dim cnt As Integer = Cmd.ExecuteScalar
+          If cnt > 0 Then
+            mRet = True
+          End If
+        End Using
+      End Using
+      Return mRet
+
     End Function
     Public Shared Function SendNotificationEMail(ByVal Record As SIS.QCM.qcmRequestAllotment) As String
       Dim mMailID As String = SIS.SYS.Utilities.ApplicationSpacific.NextMailNo

@@ -235,6 +235,7 @@
 							<td></td>
 							<td colspan="4">
  								<asp:Label ID="Label2" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# Eval("AllotmentDetails") %>'></asp:Label>
+ 								<asp:Label ID="Label3" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# Eval("POIssued") %>'></asp:Label>
 							</td>
 							<td colspan="4">
  								<asp:Label ID="Label1" runat="server" ForeColor="Red" Text='<%# Eval("ReturnDetails") %>'></asp:Label>

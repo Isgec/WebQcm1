@@ -200,13 +200,19 @@ Partial Class GF_qcmRequestAllotment
 				F_RequestStateID.SelectedValue = Session("F_RequestStateID")
 			End If
 		End If
-		Dim validateScriptProjectID As String = "<script type=""text/javascript"">" & _
-		 "  function validate_ProjectID(o) {" & _
-		 "    validated_FK_QCM_Requests_ProjectID_main = true;" & _
-		 "    validate_FK_QCM_Requests_ProjectID(o);" & _
-		 "  }" & _
-		 "</script>"
-		If Not Page.ClientScript.IsClientScriptBlockRegistered("validateProjectID") Then
+    F_RegionID.SelectedValue = String.Empty
+    If Not Session("F_RegionID") Is Nothing Then
+      If Session("F_RegionID") <> String.Empty Then
+        F_RegionID.SelectedValue = Session("F_RegionID")
+      End If
+    End If
+    Dim validateScriptProjectID As String = "<script type=""text/javascript"">" &
+     "  function validate_ProjectID(o) {" &
+     "    validated_FK_QCM_Requests_ProjectID_main = true;" &
+     "    validate_FK_QCM_Requests_ProjectID(o);" &
+     "  }" &
+     "</script>"
+    If Not Page.ClientScript.IsClientScriptBlockRegistered("validateProjectID") Then
 			Page.ClientScript.RegisterClientScriptBlock(GetType(System.String), "validateProjectID", validateScriptProjectID)
 		End If
 		Dim validateScriptAllotedTo As String = "<script type=""text/javascript"">" & _
@@ -384,4 +390,9 @@ Partial Class GF_qcmRequestAllotment
 		Session("F_AllotedTo_Display") = F_AllotedTo_Display.Text
 		InitGridPage()
 	End Sub
+
+  Private Sub F_RegionID_SelectedIndexChanged(sender As Object, e As EventArgs) Handles F_RegionID.SelectedIndexChanged
+    Session("F_RegionID") = F_RegionID.SelectedValue
+    InitGridPage()
+  End Sub
 End Class

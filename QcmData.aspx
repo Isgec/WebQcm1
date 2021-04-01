@@ -54,7 +54,7 @@
 			      </tr>
 			      <tr>
 				      <td class="alignright">
-					      <b><asp:Label ID="Label1" runat="server" Text="Inspection Status :" /></b>
+					      <b><asp:Label ID="Label1" runat="server" Text="Closing Remarks :" /></b>
 				      </td>
 				      <td>
 					      <LGM:LC_qcmInspectionStatus
@@ -271,9 +271,22 @@
                 </asp:DropDownList>
               </td>
             </tr>
+            <tr>
+				      <td class="alignright">
+					      <b><asp:Label ID="Label8" runat="server" Text="Attended Virtually :" /></b>
+				      </td>
+              <td>
+                <asp:CheckBox 
+                  ID="F_AttendedVirtually"
+                  Checked='<%# Bind("AttendedVirtually") %>'
+                  CssClass = "mychk"
+                  Runat="Server" >
+                </asp:CheckBox>
+              </td>
+            </tr>
 			      <tr>
 				      <td class="alignright">
-					      <b><asp:Label ID="L_InspectionRemarks" runat="server" Text="Inspection Remarks :" /></b>
+					      <b><asp:Label ID="L_InspectionRemarks" runat="server" Text="Remarks :" /></b>
 				      </td>
 				      <td>
 					      <asp:TextBox ID="F_InspectionRemarks"

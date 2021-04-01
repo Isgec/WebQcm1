@@ -302,6 +302,19 @@
           </asp:DropDownList>
         </td>
       </tr>
+      <tr>
+				<td class="alignright">
+					<b><asp:Label ID="Label8" runat="server" Text="Attended Virtually :" /></b>
+				</td>
+        <td>
+          <asp:CheckBox 
+            ID="F_AttendedVirtually"
+            Checked='<%# Bind("AttendedVirtually") %>'
+            CssClass = "mychk"
+            Runat="Server" >
+          </asp:CheckBox>
+        </td>
+      </tr>
 			<tr>
 				<td class="alignright">
 					<b><asp:Label ID="L_InspectionRemarks" runat="server" Text="Inspection Remarks :" /></b>
