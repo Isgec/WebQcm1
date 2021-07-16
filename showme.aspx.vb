@@ -41,7 +41,7 @@ Partial Class showme
       Sql &= " ,'" & hName & "'"
       Sql &= " ,'" & ip & "'"
       Sql &= " ,'" & ua & "')"
-      Using Con As SqlConnection = New SqlConnection("Data Source=192.9.200.150;Initial Catalog=IJTPerks;Integrated Security=False;User Instance=False;Persist Security Info=True;User ID=sa;Password=isgec12345")
+      Using Con As SqlConnection = New SqlConnection("Data Source=perk03;Initial Catalog=IJTPerks;Integrated Security=False;User Instance=False;Persist Security Info=True;User ID=sa;Password=isgec12345")
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.Text
           Cmd.CommandText = Sql
